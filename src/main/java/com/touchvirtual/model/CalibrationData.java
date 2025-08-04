@@ -80,18 +80,14 @@ public class CalibrationData {
             this.lastCalibrationTime = System.currentTimeMillis();
         }
     }
-    
-    /**
-     * Limpa todos os pontos de calibração
-     */
+
+     //Limpa todos os pontos de calibração
     public void clearCalibration() {
         calibrationPoints.clear();
         this.isCalibrated = false;
     }
-    
-    /**
-     * Converte coordenadas da câmera para coordenadas da tela
-     */
+
+     //Converte coordenadas da câmera para coordenadas da tela
     public int[] convertToScreenCoordinates(double cameraX, double cameraY) {
         if (!isCalibrated || calibrationPoints.isEmpty()) {
             // Fallback para mapeamento linear simples

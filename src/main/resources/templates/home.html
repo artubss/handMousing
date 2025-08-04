@@ -1,0 +1,183 @@
+<!-- Página Inicial -->
+<div th:fragment="home">
+    <div class="row">
+        <!-- Hero Section -->
+        <div class="col-12 mb-4">
+            <div class="card text-center">
+                <div class="card-body py-5">
+                    <h1 class="display-4 mb-3">
+                        <i class="fas fa-hand-paper text-primary me-3"></i>
+                        Touch Virtual
+                    </h1>
+                    <p class="lead mb-4">
+                        Sistema inovador de touchscreen virtual usando gestos das mãos
+                    </p>
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="text-center">
+                                        <i class="fas fa-video fa-2x text-primary mb-2"></i>
+                                        <h5>Detecção de Mãos</h5>
+                                        <p class="text-muted">Reconhecimento avançado de gestos</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="text-center">
+                                        <i class="fas fa-mouse-pointer fa-2x text-success mb-2"></i>
+                                        <h5>Controle de Mouse</h5>
+                                        <p class="text-muted">Simulação precisa de eventos</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="text-center">
+                                        <i class="fas fa-crosshairs fa-2x text-warning mb-2"></i>
+                                        <h5>Calibração Inteligente</h5>
+                                        <p class="text-muted">Mapeamento personalizado</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Cards -->
+        <div class="col-12 mb-4">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-video fa-2x text-primary mb-3"></i>
+                            <h5>Status da Câmera</h5>
+                            <div class="status-indicator" id="cameraStatus"></div>
+                            <span id="cameraStatusText">Verificando...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-hand-paper fa-2x text-success mb-3"></i>
+                            <h5>Detecção de Mãos</h5>
+                            <div class="status-indicator" id="handStatus"></div>
+                            <span id="handStatusText">Verificando...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-mouse-pointer fa-2x text-warning mb-3"></i>
+                            <h5>Controle de Mouse</h5>
+                            <div class="status-indicator" id="mouseStatus"></div>
+                            <span id="mouseStatusText">Verificando...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-crosshairs fa-2x text-info mb-3"></i>
+                            <h5>Calibração</h5>
+                            <div class="status-indicator" id="calibrationStatus"></div>
+                            <span id="calibrationStatusText">Verificando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Ações Rápidas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="/dashboard" class="btn btn-primary w-100">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="/camera" class="btn btn-success w-100">
+                                <i class="fas fa-video me-2"></i>Visualizar Câmera
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="/gestures" class="btn btn-warning w-100">
+                                <i class="fas fa-hand-rock me-2"></i>Reconhecimento
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="/calibration" class="btn btn-info w-100">
+                                <i class="fas fa-crosshairs me-2"></i>Calibrar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Info -->
+        <div class="col-12">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Informações do Sistema
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <p><strong>Versão:</strong> 1.0.0</p>
+                                    <p><strong>Porta:</strong> 8081</p>
+                                    <p><strong>Status:</strong> <span class="badge bg-success">Online</span></p>
+                                </div>
+                                <div class="col-6">
+                                    <p><strong>OpenCV:</strong> <span class="badge bg-success">Carregado</span></p>
+                                    <p><strong>WebSocket:</strong> <span class="badge bg-success">Ativo</span></p>
+                                    <p><strong>JavaCV:</strong> <span class="badge bg-success">Disponível</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>Estatísticas em Tempo Real
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <p><strong>FPS:</strong> <span id="fpsCounter">--</span></p>
+                                    <p><strong>Latência:</strong> <span id="latencyCounter">--</span>ms</p>
+                                    <p><strong>Confiança:</strong> <span id="confidenceCounter">--</span>%</p>
+                                </div>
+                                <div class="col-6">
+                                    <p><strong>Gestos:</strong> <span id="gestureCounter">--</span></p>
+                                    <p><strong>Landmarks:</strong> <span id="landmarkCounter">--</span></p>
+                                    <p><strong>Último Gesto:</strong> <span id="lastGesture">--</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

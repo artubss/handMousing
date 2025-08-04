@@ -1,0 +1,164 @@
+<!-- Scripts da Página Inicial -->
+<div th:fragment="home-scripts">
+    <script>
+        // Dados iniciais do servidor
+        const initialData = /*[[${initialData}]]*/ {};
+        
+        // Contadores para estatísticas
+        let fpsCounter = 0;
+        let latencyCounter = 0;
+        let gestureCounter = 0;
+        let landmarkCounter = 0;
+        let lastUpdateTime = Date.now();
+        
+        // Atualiza status dos componentes
+        function updateStatus() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        updateCameraStatus(data.cameraInitialized);
+                        updateHandStatus(data.handDetected);
+                        updateMouseStatus(data.mouseEnabled);
+                        updateCalibrationStatus(data.calibrated);
+                        updateConfidence(data.confidence);
+                        updateLastGesture(data.lastGesture);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao obter status:', error);
+                });
+        }
+        
+        function updateCameraStatus(initialized) {
+            const statusIndicator = document.getElementById('cameraStatus');
+            const statusText = document.getElementById('cameraStatusText');
+            
+            if (initialized) {
+                statusIndicator.className = 'status-indicator status-online';
+                statusText.textContent = 'Inicializada';
+            } else {
+                statusIndicator.className = 'status-indicator status-offline';
+                statusText.textContent = 'Não inicializada';
+            }
+        }
+        
+        function updateHandStatus(detected) {
+            const statusIndicator = document.getElementById('handStatus');
+            const statusText = document.getElementById('handStatusText');
+            
+            if (detected) {
+                statusIndicator.className = 'status-indicator status-online';
+                statusText.textContent = 'Detectada';
+            } else {
+                statusIndicator.className = 'status-indicator status-offline';
+                statusText.textContent = 'Não detectada';
+            }
+        }
+        
+        function updateMouseStatus(enabled) {
+            const statusIndicator = document.getElementById('mouseStatus');
+            const statusText = document.getElementById('mouseStatusText');
+            
+            if (enabled) {
+                statusIndicator.className = 'status-indicator status-online';
+                statusText.textContent = 'Habilitado';
+            } else {
+                statusIndicator.className = 'status-indicator status-offline';
+                statusText.textContent = 'Desabilitado';
+            }
+        }
+        
+        function updateCalibrationStatus(calibrated) {
+            const statusIndicator = document.getElementById('calibrationStatus');
+            const statusText = document.getElementById('calibrationStatusText');
+            
+            if (calibrated) {
+                statusIndicator.className = 'status-indicator status-online';
+                statusText.textContent = 'Calibrado';
+            } else {
+                statusIndicator.className = 'status-indicator status-warning';
+                statusText.textContent = 'Não calibrado';
+            }
+        }
+        
+        function updateConfidence(confidence) {
+            const confidenceElement = document.getElementById('confidenceCounter');
+            const percentage = Math.round(confidence * 100);
+            confidenceElement.textContent = percentage + '%';
+        }
+        
+        function updateLastGesture(gesture) {
+            const gestureElement = document.getElementById('lastGesture');
+            if (gesture && gesture.displayName) {
+                gestureElement.textContent = gesture.displayName;
+            } else {
+                gestureElement.textContent = 'Nenhum';
+            }
+        }
+        
+        // Override das funções do WebSocket
+        function handleGestureUpdate(data) {
+            if (data.gestureType && data.gestureType.displayName) {
+                document.getElementById('lastGesture').textContent = data.gestureType.displayName;
+                gestureCounter++;
+                document.getElementById('gestureCounter').textContent = gestureCounter;
+            }
+            
+            if (data.confidence !== undefined) {
+                updateConfidence(data.confidence);
+            }
+        }
+        
+        function handleLandmarksUpdate(data) {
+            if (data.landmarks) {
+                landmarkCounter = data.landmarks.length;
+                document.getElementById('landmarkCounter').textContent = landmarkCounter;
+            }
+        }
+        
+        function handlePerformanceUpdate(data) {
+            if (data.fps !== undefined) {
+                document.getElementById('fpsCounter').textContent = data.fps;
+            }
+            
+            if (data.latency !== undefined) {
+                document.getElementById('latencyCounter').textContent = data.latency;
+            }
+        }
+        
+        // Atualiza estatísticas em tempo real
+        function updateRealTimeStats() {
+            const currentTime = Date.now();
+            const timeDiff = currentTime - lastUpdateTime;
+            
+            if (timeDiff > 0) {
+                const fps = Math.round(1000 / timeDiff);
+                document.getElementById('fpsCounter').textContent = fps;
+            }
+            
+            lastUpdateTime = currentTime;
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Atualiza status inicial
+            updateStatus();
+            
+            // Atualiza status a cada 2 segundos
+            setInterval(updateStatus, 2000);
+            
+            // Atualiza estatísticas em tempo real
+            setInterval(updateRealTimeStats, 1000);
+            
+            // Inicializa com dados do servidor se disponíveis
+            if (initialData) {
+                updateCameraStatus(initialData.cameraInitialized);
+                updateHandStatus(initialData.handDetected);
+                updateMouseStatus(initialData.mouseEnabled);
+                updateCalibrationStatus(initialData.calibrated);
+                updateConfidence(initialData.confidence);
+            }
+        });
+    </script>
+</div> 
