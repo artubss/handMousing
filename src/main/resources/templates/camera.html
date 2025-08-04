@@ -97,6 +97,51 @@
 
               <div class="card mt-3">
                 <div class="card-header">
+                  <h5 class="mb-0">Calibração</h5>
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <button
+                      class="btn btn-success w-100"
+                      onclick="startCalibration()"
+                    >
+                      <i class="fas fa-crosshairs me-1"></i>Iniciar Calibração
+                    </button>
+                  </div>
+
+                  <div class="mb-3">
+                    <button
+                      class="btn btn-warning w-100"
+                      onclick="autoCalibrate()"
+                    >
+                      <i class="fas fa-magic me-1"></i>Calibração Automática
+                    </button>
+                  </div>
+
+                  <div class="mb-3">
+                    <button
+                      class="btn btn-info w-100"
+                      onclick="resetCalibration()"
+                    >
+                      <i class="fas fa-undo me-1"></i>Resetar Calibração
+                    </button>
+                  </div>
+
+                  <div class="alert alert-info">
+                    <small>
+                      <strong>Status:</strong>
+                      <span id="calibrationStatus">Não calibrado</span><br />
+                      <strong>Pontos:</strong>
+                      <span id="calibrationPoints">0/4</span><br />
+                      <strong>Precisão:</strong>
+                      <span id="calibrationAccuracy">--</span>
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card mt-3">
+                <div class="card-header">
                   <h5 class="mb-0">Informações</h5>
                 </div>
                 <div class="card-body">
@@ -114,6 +159,14 @@
                   <p>
                     <strong>Latência:</strong>
                     <span id="currentLatency">--</span>ms
+                  </p>
+                  <p>
+                    <strong>Mãos Detectadas:</strong>
+                    <span id="handCount">0</span>
+                  </p>
+                  <p>
+                    <strong>Confiança:</strong>
+                    <span id="confidence">--</span>%
                   </p>
                 </div>
               </div>

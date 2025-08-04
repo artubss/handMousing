@@ -1,6 +1,6 @@
 # Configurações do Spring Boot
 server:
-  port: 8081
+  port: 8082
 
 spring:
   application:
@@ -45,6 +45,12 @@ mapping:
 websocket:
   max-text-message-size: 8192
   max-binary-message-size: 8192
+
+# Configurações do sistema
+system:
+  headless: false
+  robot:
+    enabled: true
 
 # Configurações de atuador
 management:

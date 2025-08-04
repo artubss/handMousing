@@ -30,7 +30,7 @@ public class GestureController {
     private static final Logger logger = LoggerFactory.getLogger(GestureController.class);
     
     @Autowired
-    private HandDetectionService handDetectionService;
+    private PythonHandDetectionService handDetectionService;
     
     @Autowired
     private GestureRecognitionService gestureRecognitionService;

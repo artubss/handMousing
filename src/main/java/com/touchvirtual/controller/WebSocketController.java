@@ -31,7 +31,7 @@ public class WebSocketController {
     private static final Logger logger = LoggerFactory.getLogger(WebSocketController.class);
     
     @Autowired
-    private HandDetectionService handDetectionService;
+    private PythonHandDetectionService handDetectionService;
     
     @Autowired
     private GestureRecognitionService gestureRecognitionService;

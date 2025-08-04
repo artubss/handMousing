@@ -11,22 +11,112 @@
             <div class="col-md-8">
               <div class="card">
                 <div class="card-header">
-                  <h5 class="mb-0">Gestos Detectados</h5>
+                  <h5 class="mb-0">Câmera e Detecção</h5>
                 </div>
                 <div class="card-body">
-                  <div id="gestureDisplay" class="text-center p-4">
-                    <i class="fas fa-hand-paper fa-4x text-muted"></i>
-                    <p class="mt-3 text-muted">Aguardando gestos...</p>
-                  </div>
-
-                  <div class="row mt-3">
+                  <div class="row">
                     <div class="col-md-6">
-                      <h6>Último Gesto:</h6>
-                      <p id="lastGesture">Nenhum</p>
+                      <div
+                        id="cameraFeed"
+                        class="bg-dark rounded p-3 mb-3 text-center"
+                        style="min-height: 300px;"
+                      >
+                        <i class="fas fa-video fa-3x text-light"></i>
+                        <p class="text-light mt-2">
+                          Feed da câmera será exibido aqui
+                        </p>
+                      </div>
+                      <div class="btn-group w-100" role="group">
+                        <button class="btn btn-primary" onclick="startCamera()">
+                          <i class="fas fa-play me-1"></i>Iniciar
+                        </button>
+                        <button
+                          class="btn btn-secondary"
+                          onclick="stopCamera()"
+                        >
+                          <i class="fas fa-stop me-1"></i>Parar
+                        </button>
+                      </div>
                     </div>
+
                     <div class="col-md-6">
-                      <h6>Confiança:</h6>
-                      <p id="gestureConfidence">0%</p>
+                      <div id="gestureDisplay" class="text-center p-4">
+                        <i class="fas fa-hand-paper fa-4x text-muted"></i>
+                        <p class="mt-3 text-muted">Aguardando gestos...</p>
+                      </div>
+
+                      <div class="row mt-3">
+                        <div class="col-md-6">
+                          <h6>Último Gesto:</h6>
+                          <p id="lastGesture">Nenhum</p>
+                        </div>
+                        <div class="col-md-6">
+                          <h6>Confiança:</h6>
+                          <p id="gestureConfidence">0%</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Área de Testes Interativos -->
+              <div class="card mt-3">
+                <div class="card-header">
+                  <h5 class="mb-0">Testes Interativos</h5>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <h6>Teste de Click</h6>
+                      <div
+                        class="test-area bg-light p-3 rounded mb-3"
+                        id="clickTest"
+                      >
+                        <p class="text-center mb-2">
+                          Clique aqui com o dedo indicador
+                        </p>
+                        <div class="click-counter">
+                          Clicks: <span id="clickCount">0</span>
+                        </div>
+                      </div>
+
+                      <h6>Teste de Right Click</h6>
+                      <div
+                        class="test-area bg-light p-3 rounded mb-3"
+                        id="rightClickTest"
+                      >
+                        <p class="text-center mb-2">
+                          Clique direito com dois dedos
+                        </p>
+                        <div class="click-counter">
+                          Right Clicks: <span id="rightClickCount">0</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <h6>Teste de Drag</h6>
+                      <div
+                        class="test-area bg-light p-3 rounded mb-3"
+                        id="dragTest"
+                      >
+                        <p class="text-center mb-2">Arraste com mão fechada</p>
+                        <div class="drag-status">
+                          Status: <span id="dragStatus">Parado</span>
+                        </div>
+                      </div>
+
+                      <h6>Teste de Scroll</h6>
+                      <div
+                        class="test-area bg-light p-3 rounded mb-3"
+                        id="scrollTest"
+                      >
+                        <p class="text-center mb-2">Scroll com três dedos</p>
+                        <div class="scroll-position">
+                          Posição: <span id="scrollPosition">0</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -36,50 +126,32 @@
             <div class="col-md-4">
               <div class="card">
                 <div class="card-header">
-                  <h5 class="mb-0">Gestos Suportados</h5>
+                  <h5 class="mb-0">Controle do Mouse</h5>
                 </div>
                 <div class="card-body">
-                  <div class="list-group">
-                    <div class="list-group-item">
-                      <i class="fas fa-mouse-pointer text-primary me-2"></i>
-                      <strong>Click</strong>
-                      <small class="text-muted d-block"
-                        >Dedo indicador estendido</small
-                      >
-                    </div>
-                    <div class="list-group-item">
-                      <i class="fas fa-mouse-pointer text-success me-2"></i>
-                      <strong>Right Click</strong>
-                      <small class="text-muted d-block"
-                        >Dois dedos estendidos</small
-                      >
-                    </div>
-                    <div class="list-group-item">
-                      <i class="fas fa-mouse-pointer text-warning me-2"></i>
-                      <strong>Double Click</strong>
-                      <small class="text-muted d-block">Ponta do dedo</small>
-                    </div>
-                    <div class="list-group-item">
-                      <i class="fas fa-arrows-alt text-info me-2"></i>
-                      <strong>Drag</strong>
-                      <small class="text-muted d-block">Mão fechada</small>
-                    </div>
-                    <div class="list-group-item">
-                      <i class="fas fa-scroll text-secondary me-2"></i>
-                      <strong>Scroll</strong>
-                      <small class="text-muted d-block"
-                        >Movimento vertical</small
-                      >
-                    </div>
+                  <div class="alert alert-info">
+                    <i class="fas fa-mouse"></i>
+                    <strong>Controle do Mouse:</strong> Use suas mãos para controlar o cursor do mouse na tela.
                   </div>
-                </div>
-              </div>
-
-              <div class="card mt-3">
-                <div class="card-header">
-                  <h5 class="mb-0">Configurações</h5>
-                </div>
-                <div class="card-body">
+                  <div class="btn-group w-100 mb-3" role="group">
+                    <button class="btn btn-primary" onclick="startMouseControl()">
+                      <i class="fas fa-mouse me-1"></i>Iniciar
+                    </button>
+                    <button class="btn btn-warning" onclick="stopMouseControl()">
+                      <i class="fas fa-stop me-1"></i>Parar
+                    </button>
+                  </div>
+                  <div class="form-check mb-2">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="mouseControlEnabled"
+                      checked
+                    />
+                    <label class="form-check-label" for="mouseControlEnabled">
+                      Ativar controle do mouse
+                    </label>
+                  </div>
                   <div class="form-check mb-2">
                     <input
                       class="form-check-input"
@@ -113,6 +185,92 @@
                       Som de feedback
                     </label>
                   </div>
+                  <div class="form-check mb-2">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="enableVisualization"
+                      checked
+                    />
+                    <label class="form-check-label" for="enableVisualization">
+                      Visualização na câmera
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card mt-3">
+                <div class="card-header">
+                  <h5 class="mb-0">Gestos Suportados</h5>
+                </div>
+                <div class="card-body">
+                  <div class="list-group">
+                    <div class="list-group-item">
+                      <i class="fas fa-mouse-pointer text-primary me-2"></i>
+                      <strong>Click</strong>
+                      <small class="text-muted d-block"
+                        >Dedo indicador estendido</small
+                      >
+                    </div>
+                    <div class="list-group-item">
+                      <i class="fas fa-mouse-pointer text-success me-2"></i>
+                      <strong>Right Click</strong>
+                      <small class="text-muted d-block"
+                        >Dois dedos estendidos</small
+                      >
+                    </div>
+                    <div class="list-group-item">
+                      <i class="fas fa-mouse-pointer text-warning me-2"></i>
+                      <strong>Double Click</strong>
+                      <small class="text-muted d-block"
+                        >Quatro dedos estendidos</small
+                      >
+                    </div>
+                    <div class="list-group-item">
+                      <i class="fas fa-arrows-alt text-info me-2"></i>
+                      <strong>Drag</strong>
+                      <small class="text-muted d-block">Mão fechada</small>
+                    </div>
+                    <div class="list-group-item">
+                      <i class="fas fa-scroll text-secondary me-2"></i>
+                      <strong>Scroll</strong>
+                      <small class="text-muted d-block"
+                        >Três dedos estendidos</small
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card mt-3">
+                <div class="card-header">
+                  <h5 class="mb-0">Status do Sistema</h5>
+                </div>
+                <div class="card-body">
+                  <p>
+                    <strong>Câmera:</strong>
+                    <span id="cameraStatus">Desconectado</span>
+                  </p>
+                  <p>
+                    <strong>Detecção:</strong>
+                    <span id="detectionStatus">Inativo</span>
+                  </p>
+                  <p>
+                    <strong>Controle do Mouse:</strong>
+                    <span id="mouseControlStatus">Inativo</span>
+                  </p>
+                  <p>
+                    <strong>Mãos Detectadas:</strong>
+                    <span id="handCount">0</span>
+                  </p>
+                  <p>
+                    <strong>Confiança:</strong> <span id="confidence">--</span>%
+                  </p>
+                  <p><strong>FPS:</strong> <span id="currentFps">--</span></p>
+                  <p>
+                    <strong>Posição do Mouse:</strong>
+                    <span id="mousePosition">--</span>
+                  </p>
                 </div>
               </div>
             </div>

@@ -61,9 +61,11 @@ public class MouseSimulationService {
             // Verifica se o ambiente suporta GUI
             if (GraphicsEnvironment.isHeadless()) {
                 logger.warn("⚠️ Ambiente headless detectado - Robot não disponível");
+                logger.info("💡 Para usar o Robot, execute a aplicação com GUI ou use -Djava.awt.headless=false");
                 return;
             }
 
+            // Tenta criar o Robot com configurações específicas
             robot = new Robot();
             robot.setAutoDelay(0); // Sem delay automático
             robot.setAutoWaitForIdle(false); // Não espera idle
@@ -72,7 +74,11 @@ public class MouseSimulationService {
 
         } catch (AWTException e) {
             logger.error("❌ Erro ao inicializar Robot: {}", e.getMessage());
+            logger.info("💡 Verifique se o ambiente suporta GUI ou use -Djava.awt.headless=false");
             // Não lança exceção, apenas loga o erro
+        } catch (SecurityException e) {
+            logger.error("❌ Erro de segurança ao inicializar Robot: {}", e.getMessage());
+            logger.info("💡 Verifique as permissões de segurança da aplicação");
         }
     }
 

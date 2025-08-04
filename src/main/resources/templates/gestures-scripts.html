@@ -3,22 +3,195 @@
   <script>
     let gestureHistory = [];
     let currentGesture = null;
+    let isDetectionActive = false;
+    let cameraActive = false;
+    let mouseControlActive = false;
+    let testCounters = {
+      click: 0,
+      rightClick: 0,
+      drag: 0,
+      scroll: 0
+    };
+    let lastGestureTime = 0;
+    let gestureCooldown = 1000; // 1 segundo entre gestos
+
+    // Funções de controle da câmera
+    function startCamera() {
+      fetch('/api/detection/start', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          cameraActive = true;
+          updateCameraStatus('Ativo');
+          updateDetectionStatus('Ativo');
+          console.log('✅ Câmera iniciada');
+        } else {
+          console.error('❌ Erro ao iniciar câmera:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('❌ Erro ao iniciar câmera:', error);
+      });
+    }
+
+    function stopCamera() {
+      fetch('/api/detection/stop', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          cameraActive = false;
+          updateCameraStatus('Desconectado');
+          updateDetectionStatus('Inativo');
+          console.log('⏹️ Câmera parada');
+        } else {
+          console.error('❌ Erro ao parar câmera:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('❌ Erro ao parar câmera:', error);
+      });
+    }
+
+    function updateCameraStatus(status) {
+      document.getElementById('cameraStatus').textContent = status;
+    }
+
+    function updateDetectionStatus(status) {
+      document.getElementById('detectionStatus').textContent = status;
+    }
+
+    // Função para processar gestos detectados
+    function processGesture(gesture, confidence) {
+      const now = Date.now();
+      
+      // Evita processar o mesmo gesto muito rapidamente
+      if (now - lastGestureTime < gestureCooldown) {
+        return;
+      }
+
+      if (gesture && gesture !== 'NONE' && confidence > 0.6) {
+        lastGestureTime = now;
+        
+        // Atualiza display do gesto
+        updateGestureDisplay({
+          displayName: getGestureDisplayName(gesture),
+          confidence: confidence,
+          type: gesture
+        });
+
+        // Processa testes interativos
+        processGestureTests(gesture, confidence);
+
+        // Toca som se habilitado
+        if (document.getElementById('enableSound').checked) {
+          playGestureSound(gesture);
+        }
+
+        console.log(`🎯 Gesto detectado: ${gesture} (${Math.round(confidence * 100)}%)`);
+      }
+    }
+
+    function getGestureDisplayName(gesture) {
+      const gestureNames = {
+        'CLICK': 'Click',
+        'RIGHT_CLICK': 'Right Click',
+        'DOUBLE_CLICK': 'Double Click',
+        'DRAG': 'Drag',
+        'SCROLL': 'Scroll',
+        'NONE': 'Nenhum'
+      };
+      return gestureNames[gesture] || gesture;
+    }
+
+    function processGestureTests(gesture, confidence) {
+      switch (gesture) {
+        case 'CLICK':
+          testCounters.click++;
+          document.getElementById('clickCount').textContent = testCounters.click;
+          highlightTestArea('clickTest', 'success');
+          break;
+          
+        case 'RIGHT_CLICK':
+          testCounters.rightClick++;
+          document.getElementById('rightClickCount').textContent = testCounters.rightClick;
+          highlightTestArea('rightClickTest', 'success');
+          break;
+          
+        case 'DRAG':
+          document.getElementById('dragStatus').textContent = 'Arrastando';
+          highlightTestArea('dragTest', 'info');
+          break;
+          
+        case 'SCROLL':
+          testCounters.scroll++;
+          document.getElementById('scrollPosition').textContent = testCounters.scroll;
+          highlightTestArea('scrollTest', 'warning');
+          break;
+      }
+    }
+
+    function highlightTestArea(elementId, type) {
+      const element = document.getElementById(elementId);
+      const originalClass = element.className;
+      
+      // Adiciona classe de destaque
+      element.classList.add(`border-${type}`);
+      element.classList.add('border-3');
+      
+      // Remove destaque após 1 segundo
+      setTimeout(() => {
+        element.className = originalClass;
+      }, 1000);
+    }
+
+    function playGestureSound(gesture) {
+      // Cria um beep simples
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Frequência baseada no gesto
+      const frequencies = {
+        'CLICK': 800,
+        'RIGHT_CLICK': 600,
+        'DOUBLE_CLICK': 1000,
+        'DRAG': 400,
+        'SCROLL': 500
+      };
+      
+      oscillator.frequency.setValueAtTime(frequencies[gesture] || 500, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1);
+    }
 
     function updateGestureDisplay(gesture) {
       const display = document.getElementById("gestureDisplay");
       const lastGesture = document.getElementById("lastGesture");
       const confidence = document.getElementById("gestureConfidence");
 
-      if (gesture) {
+      if (gesture && gesture.type !== 'NONE') {
         display.innerHTML = `
           <i class="fas fa-hand-paper fa-4x text-success"></i>
-          <p class="mt-3 text-success">${
-            gesture.displayName || "Gesto detectado"
-          }</p>
+          <p class="mt-3 text-success">${gesture.displayName}</p>
         `;
-        lastGesture.textContent = gesture.displayName || "Desconhecido";
-        confidence.textContent =
-          Math.round((gesture.confidence || 0) * 100) + "%";
+        lastGesture.textContent = gesture.displayName;
+        confidence.textContent = Math.round((gesture.confidence || 0) * 100) + "%";
 
         // Adiciona ao histórico
         gestureHistory.unshift({
@@ -41,63 +214,326 @@
       }
     }
 
-    function updateGestureHistory() {
-      // Aqui você pode implementar a atualização do histórico
-      // Por enquanto, apenas mantemos os dados em memória
-    }
-
-    // Função para obter gestos do servidor
-    function fetchGestures() {
-      fetch("/api/status")
+    // Função para obter dados do servidor
+    function fetchSystemStatus() {
+      fetch("/api/system/status")
         .then((response) => response.json())
         .then((data) => {
-          if (data.lastGesture) {
-            updateGestureDisplay(data.lastGesture);
+          // Atualiza status da câmera
+          if (data.cameraInitialized) {
+            updateCameraStatus('Ativo');
+            cameraActive = true;
+          } else {
+            updateCameraStatus('Desconectado');
+            cameraActive = false;
           }
-          if (data.gestureConfidence !== undefined) {
-            document.getElementById("gestureConfidence").textContent =
-              Math.round(data.gestureConfidence * 100) + "%";
+
+          // Atualiza status da detecção
+          if (data.processing) {
+            updateDetectionStatus('Ativo');
+            isDetectionActive = true;
+          } else {
+            updateDetectionStatus('Inativo');
+            isDetectionActive = false;
+          }
+
+          // Atualiza contadores
+          if (data.handCount !== undefined) {
+            document.getElementById('handCount').textContent = data.handCount;
+          }
+          if (data.confidence !== undefined) {
+            document.getElementById('confidence').textContent = Math.round(data.confidence * 100) + '%';
+          }
+
+          // Processa gesto se disponível
+          if (data.lastGesture && data.gestureConfidence) {
+            processGesture(data.lastGesture, data.gestureConfidence);
           }
         })
         .catch((error) => {
-          console.error("Erro ao obter gestos:", error);
+          console.error("Erro ao obter status do sistema:", error);
+        });
+    }
+
+    // Função para obter status da detecção
+    function fetchDetectionStatus() {
+      fetch("/api/detection/status")
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.processing) {
+            updateDetectionStatus('Ativo');
+            isDetectionActive = true;
+          } else {
+            updateDetectionStatus('Inativo');
+            isDetectionActive = false;
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao obter status da detecção:", error);
         });
     }
 
     // Event listeners para configurações
-    document
-      .getElementById("enableGestures")
-      .addEventListener("change", function () {
-        console.log(
-          "Reconhecimento de gestos:",
-          this.checked ? "habilitado" : "desabilitado"
-        );
-      });
+    document.getElementById("enableGestures").addEventListener("change", function () {
+      console.log("Reconhecimento de gestos:", this.checked ? "habilitado" : "desabilitado");
+    });
 
-    document
-      .getElementById("showLandmarks")
-      .addEventListener("change", function () {
-        console.log("Landmarks:", this.checked ? "visíveis" : "ocultos");
-      });
+    document.getElementById("showLandmarks").addEventListener("change", function () {
+      console.log("Landmarks:", this.checked ? "visíveis" : "ocultos");
+    });
 
-    document
-      .getElementById("enableSound")
-      .addEventListener("change", function () {
-        console.log(
-          "Som de feedback:",
-          this.checked ? "habilitado" : "desabilitado"
-        );
-      });
+    document.getElementById("enableSound").addEventListener("change", function () {
+      console.log("Som de feedback:", this.checked ? "habilitado" : "desabilitado");
+    });
+
+    document.getElementById("enableVisualization").addEventListener("change", function () {
+      console.log("Visualização na câmera:", this.checked ? "habilitada" : "desabilitada");
+    });
+
+    // Função para resetar contadores de teste
+    function resetTestCounters() {
+      testCounters = {
+        click: 0,
+        rightClick: 0,
+        drag: 0,
+        scroll: 0
+      };
+      
+      document.getElementById('clickCount').textContent = '0';
+      document.getElementById('rightClickCount').textContent = '0';
+      document.getElementById('dragStatus').textContent = 'Parado';
+      document.getElementById('scrollPosition').textContent = '0';
+      
+      console.log('🔄 Contadores de teste resetados');
+    }
+
+    // Função para limpar histórico de gestos
+    function clearGestureHistory() {
+      gestureHistory = [];
+      console.log('🗑️ Histórico de gestos limpo');
+    }
 
     // Inicialização
     document.addEventListener("DOMContentLoaded", function () {
       console.log("🤚 Página de gestos carregada");
 
-      // Atualiza gestos a cada segundo
-      setInterval(fetchGestures, 1000);
+      // Atualiza status a cada segundo
+      setInterval(fetchSystemStatus, 1000);
+      
+      // Atualiza status da detecção a cada 2 segundos
+      setInterval(fetchDetectionStatus, 2000);
 
       // Atualização inicial
-      fetchGestures();
+      fetchSystemStatus();
+      fetchDetectionStatus();
+
+      // Adiciona botões de controle se não existirem
+      addControlButtons();
     });
+
+    function addControlButtons() {
+      // Adiciona botões de controle no topo da página
+      const header = document.querySelector('.card-header');
+      if (header && !document.getElementById('controlButtons')) {
+        const controlDiv = document.createElement('div');
+        controlDiv.id = 'controlButtons';
+        controlDiv.className = 'mt-2';
+        controlDiv.innerHTML = `
+          <button class="btn btn-sm btn-outline-secondary me-2" onclick="resetTestCounters()">
+            <i class="fas fa-redo"></i> Resetar Testes
+          </button>
+          <button class="btn btn-sm btn-outline-secondary me-2" onclick="clearGestureHistory()">
+            <i class="fas fa-trash"></i> Limpar Histórico
+          </button>
+          <button class="btn btn-sm btn-outline-info" onclick="showGestureHelp()">
+            <i class="fas fa-question-circle"></i> Ajuda
+          </button>
+        `;
+        header.appendChild(controlDiv);
+      }
+    }
+
+    function showGestureHelp() {
+      const helpText = `
+        <h6>Como usar os gestos:</h6>
+        <ul>
+          <li><strong>Click:</strong> Estenda apenas o dedo indicador</li>
+          <li><strong>Right Click:</strong> Estenda o indicador e o médio</li>
+          <li><strong>Double Click:</strong> Estenda quatro dedos</li>
+          <li><strong>Drag:</strong> Feche a mão (punho)</li>
+          <li><strong>Scroll:</strong> Estenda três dedos</li>
+        </ul>
+        <p><small>Dica: Mantenha a mão estável e bem iluminada para melhor detecção.</small></p>
+      `;
+      
+      // Cria um modal simples
+      const modal = document.createElement('div');
+      modal.className = 'modal fade';
+      modal.innerHTML = `
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Ajuda - Gestos</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              ${helpText}
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      const bootstrapModal = new bootstrap.Modal(modal);
+      bootstrapModal.show();
+      
+      // Remove modal do DOM após fechar
+      modal.addEventListener('hidden.bs.modal', function() {
+        document.body.removeChild(modal);
+      });
+    }
+
+    // Funções de controle do mouse
+    function startMouseControl() {
+      if (mouseControlActive) {
+        showAlert('Controle do mouse já está ativo', 'warning');
+        return;
+      }
+      
+      fetch('/api/mouse-control/start', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          camera_index: 0,
+          fps: 30
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          mouseControlActive = true;
+          showAlert('Controle do mouse iniciado com sucesso!', 'success');
+          updateMouseControlStatus();
+        } else {
+          showAlert('Erro ao iniciar controle do mouse: ' + data.message, 'danger');
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao iniciar controle do mouse:', error);
+        showAlert('Erro ao conectar com serviço de controle do mouse', 'danger');
+      });
+    }
+
+    function stopMouseControl() {
+      if (!mouseControlActive) {
+        showAlert('Controle do mouse não está ativo', 'warning');
+        return;
+      }
+      
+      fetch('/api/mouse-control/stop', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          mouseControlActive = false;
+          showAlert('Controle do mouse parado com sucesso!', 'info');
+          updateMouseControlStatus();
+        } else {
+          showAlert('Erro ao parar controle do mouse: ' + data.message, 'danger');
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao parar controle do mouse:', error);
+        showAlert('Erro ao conectar com serviço de controle do mouse', 'danger');
+      });
+    }
+
+    function updateMouseControlStatus() {
+      fetch('/api/mouse-control/status')
+      .then(response => response.json())
+      .then(data => {
+        const mouseStatusElement = document.getElementById('mouseControlStatus');
+        if (mouseStatusElement) {
+          if (data.running) {
+            mouseStatusElement.textContent = 'Ativo';
+            mouseStatusElement.className = 'text-success';
+          } else {
+            mouseStatusElement.textContent = 'Inativo';
+            mouseStatusElement.className = 'text-danger';
+          }
+        }
+        
+        // Atualiza posição do mouse se disponível
+        if (data.mouse_position) {
+          const mousePosElement = document.getElementById('mousePosition');
+          if (mousePosElement) {
+            mousePosElement.textContent = `(${data.mouse_position[0]}, ${data.mouse_position[1]})`;
+          }
+        }
+
+        // Processa gesto do mouse control se disponível
+        if (data.last_gesture && data.last_gesture !== 'NONE') {
+          processGesture(data.last_gesture, 0.8); // Confiança alta para gestos do mouse
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao obter status do controle do mouse:', error);
+      });
+    }
+
+    function checkMouseControlHealth() {
+      fetch('/api/mouse-control/health')
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'healthy') {
+          console.log('Serviço de controle do mouse está saudável');
+        } else {
+          console.warn('Serviço de controle do mouse não está saudável');
+        }
+      })
+      .catch(error => {
+        console.error('Erro no health check do controle do mouse:', error);
+      });
+    }
+
+    // Função para mostrar alertas
+    function showAlert(message, type) {
+      // Remove alertas anteriores
+      const existingAlerts = document.querySelectorAll('.alert-floating');
+      existingAlerts.forEach(alert => alert.remove());
+      
+      // Cria novo alerta
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-floating position-fixed`;
+      alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+      alertDiv.innerHTML = `
+        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+        ${message}
+      `;
+      
+      document.body.appendChild(alertDiv);
+      
+      // Remove alerta após 5 segundos
+      setTimeout(() => {
+        if (alertDiv.parentElement) {
+          alertDiv.remove();
+        }
+      }, 5000);
+    }
+
+    // Adiciona health check do mouse control
+    setInterval(checkMouseControlHealth, 5000);
+    
+    // Atualiza status do mouse control periodicamente
+    setInterval(updateMouseControlStatus, 2000);
   </script>
 </div>

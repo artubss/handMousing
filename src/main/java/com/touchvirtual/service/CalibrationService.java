@@ -27,7 +27,7 @@ public class CalibrationService {
 
     @Autowired
     @Lazy
-    private HandDetectionService handDetectionService;
+    private PythonHandDetectionService handDetectionService;
 
     @Autowired
     @Lazy

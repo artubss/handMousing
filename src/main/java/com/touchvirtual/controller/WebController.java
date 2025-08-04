@@ -20,7 +20,7 @@ public class WebController {
     private static final Logger logger = LoggerFactory.getLogger(WebController.class);
 
     @Autowired
-    private HandDetectionService handDetectionService;
+    private PythonHandDetectionService handDetectionService;
 
     @Autowired
     private GestureRecognitionService gestureRecognitionService;
@@ -30,9 +30,6 @@ public class WebController {
 
     @Autowired
     private MouseSimulationService mouseSimulationService;
-
-    @Autowired
-    private CalibrationService calibrationService;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -94,15 +91,6 @@ public class WebController {
         return "layout";
     }
 
-    @GetMapping("/calibration")
-    public String calibration(Model model) {
-        model.addAttribute("title", "Calibração");
-        model.addAttribute("content", "calibration");
-        model.addAttribute("scripts", "calibration-scripts");
-
-        return "layout";
-    }
-
     @GetMapping("/settings")
     public String settings(Model model) {
         model.addAttribute("title", "Configurações");
@@ -112,36 +100,25 @@ public class WebController {
         return "layout";
     }
 
-    /**
-     * Página de teste
-     */
     @GetMapping("/test-page")
     public String testPage(Model model) {
-        model.addAttribute("title", "Teste");
+        model.addAttribute("title", "Página de Teste");
         model.addAttribute("content", "test");
         model.addAttribute("scripts", "test-scripts");
 
         return "layout";
     }
 
-    /**
-     * Página de teste (alias)
-     */
-    @GetMapping("/test")
-    public String test(Model model) {
-        return testPage(model);
-    }
-
     @GetMapping("/status")
     public String statusPage(Model model) {
-        model.addAttribute("title", "Status");
+        model.addAttribute("title", "Status do Sistema");
         model.addAttribute("content", "status");
         model.addAttribute("scripts", "status-scripts");
 
         return "layout";
     }
 
-    @GetMapping("/api/status")
+    @GetMapping("/api/system/status")
     @ResponseBody
     public Map<String, Object> getStatus() {
         Map<String, Object> status = new HashMap<>();
@@ -222,7 +199,6 @@ public class WebController {
             response.put("success", false);
             response.put("error", e.getMessage());
         }
-
         return response;
     }
 
@@ -248,5 +224,4 @@ public class WebController {
 
         return response;
     }
-
 }

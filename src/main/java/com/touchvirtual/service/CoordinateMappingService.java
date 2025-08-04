@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Serviço de mapeamento de coordenadas da câmera para a tela

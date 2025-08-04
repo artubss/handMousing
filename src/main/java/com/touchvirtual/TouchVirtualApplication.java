@@ -23,7 +23,7 @@ public class TouchVirtualApplication {
         SpringApplication.run(TouchVirtualApplication.class, args);
 
         System.out.println("🚀 TouchVirtual iniciado com sucesso!");
-        System.out.println("📱 Acesse: http://localhost:8081");
+        System.out.println("📱 Acesse: http://localhost:8082");
         System.out.println("🎯 Sistema de touchscreen virtual ativo");
     }
 }

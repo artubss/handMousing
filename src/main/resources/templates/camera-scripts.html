@@ -4,6 +4,9 @@
     let cameraActive = false;
     let cameraStream = null;
     let videoElement = null;
+    let calibrationActive = false;
+    let calibrationPoints = 0;
+    let sessionId = null;
 
     function startCamera() {
       if (cameraActive) {
@@ -35,6 +38,9 @@
 
           updateCameraStatus("Ativo");
           updateCameraInfo();
+
+          // Inicia detecção de mãos
+          startHandDetection();
 
           console.log("✅ Câmera iniciada com sucesso");
         })
@@ -81,6 +87,117 @@
       console.log("📸 Frame capturado");
     }
 
+    // Funções de calibração
+    function startCalibration() {
+      if (!cameraActive) {
+        alert("Câmera deve estar ativa para calibrar");
+        return;
+      }
+
+      sessionId = "camera_" + Date.now();
+      calibrationActive = true;
+      calibrationPoints = 0;
+
+      fetch("/api/calibration/start", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: `sessionId=${sessionId}`,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            updateCalibrationStatus("Calibrando...");
+            updateCalibrationPoints("0/4");
+            showNotification("Calibração iniciada", "success");
+          } else {
+            showNotification("Erro ao iniciar calibração", "error");
+          }
+        })
+        .catch((error) => {
+          console.error("Erro:", error);
+          showNotification("Erro ao iniciar calibração", "error");
+        });
+    }
+
+    function autoCalibrate() {
+      if (!cameraActive) {
+        alert("Câmera deve estar ativa para calibrar");
+        return;
+      }
+
+      sessionId = "camera_" + Date.now();
+
+      fetch("/api/calibration/auto", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: `sessionId=${sessionId}`,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            updateCalibrationStatus("Calibrado");
+            updateCalibrationPoints("4/4");
+            updateCalibrationAccuracy("100%");
+            showNotification("Calibração automática concluída", "success");
+          } else {
+            showNotification("Erro na calibração automática", "error");
+          }
+        })
+        .catch((error) => {
+          console.error("Erro:", error);
+          showNotification("Erro na calibração automática", "error");
+        });
+    }
+
+    function resetCalibration() {
+      fetch("/api/calibration/reset", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            updateCalibrationStatus("Não calibrado");
+            updateCalibrationPoints("0/4");
+            updateCalibrationAccuracy("--");
+            showNotification("Calibração resetada", "success");
+          } else {
+            showNotification("Erro ao resetar calibração", "error");
+          }
+        })
+        .catch((error) => {
+          console.error("Erro:", error);
+          showNotification("Erro ao resetar calibração", "error");
+        });
+    }
+
+    // Funções de detecção de mãos
+    function startHandDetection() {
+      fetch("/api/detection/start", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            console.log("✅ Detecção de mãos iniciada");
+          } else {
+            console.error("❌ Erro ao iniciar detecção:", data.error);
+          }
+        })
+        .catch((error) => {
+          console.error("❌ Erro ao iniciar detecção:", error);
+        });
+    }
+
     function updateCameraStatus(status) {
       document.getElementById("cameraStatus").textContent = status;
     }
@@ -90,6 +207,57 @@
         document.getElementById("currentResolution").textContent =
           videoElement.videoWidth + "x" + videoElement.videoHeight;
       }
+    }
+
+    function updateCalibrationStatus(status) {
+      document.getElementById("calibrationStatus").textContent = status;
+    }
+
+    function updateCalibrationPoints(points) {
+      document.getElementById("calibrationPoints").textContent = points;
+    }
+
+    function updateCalibrationAccuracy(accuracy) {
+      document.getElementById("calibrationAccuracy").textContent = accuracy;
+    }
+
+    function showNotification(message, type) {
+      const notification = document.createElement("div");
+      notification.className = `alert alert-${
+        type === "success" ? "success" : "danger"
+      } alert-dismissible fade show position-fixed`;
+      notification.style.cssText =
+        "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+      notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 3000);
+    }
+
+    // Atualiza informações de detecção
+    function updateDetectionInfo() {
+      fetch("/api/detection/status")
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            document.getElementById("handCount").textContent =
+              data.handCount || 0;
+            const confidence = Math.round((data.confidence || 0) * 100);
+            document.getElementById("confidence").textContent =
+              confidence + "%";
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao obter status da detecção:", error);
+        });
     }
 
     // Event listeners para controles
@@ -115,6 +283,7 @@
     setInterval(function () {
       if (cameraActive) {
         updateCameraInfo();
+        updateDetectionInfo();
       }
     }, 1000);
 

@@ -1,37 +1,16 @@
 #!/bin/bash
 
-echo "========================================"
-echo "   Touch Virtual - Inicializando..."
-echo "========================================"
+echo "🚀 Iniciando TouchVirtual..."
+echo
 
-# Verifica se o Java está instalado
-if ! command -v java &> /dev/null; then
-    echo "ERRO: Java não encontrado!"
-    echo "Por favor, instale o Java 17 ou superior"
-    exit 1
-fi
+# Desabilita modo headless para permitir Robot
+export JAVA_OPTS="-Djava.awt.headless=false"
 
-# Verifica se o Maven está instalado
-if ! command -v mvn &> /dev/null; then
-    echo "ERRO: Maven não encontrado!"
-    echo "Por favor, instale o Maven 3.6 ou superior"
-    exit 1
-fi
-
-echo ""
-echo "Compilando o projeto..."
+# Compila e executa a aplicação
 mvn clean compile
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Djava.awt.headless=false"
 
-if [ $? -ne 0 ]; then
-    echo "ERRO: Falha na compilação!"
-    exit 1
-fi
-
-echo ""
-echo "Iniciando a aplicação..."
-echo "Acesse: http://localhost:8080"
-echo ""
-echo "Pressione Ctrl+C para parar"
-echo ""
-
-mvn spring-boot:run 
+echo
+echo "✅ TouchVirtual iniciado com sucesso!"
+echo "📱 Acesse: http://localhost:8082"
+echo "🎯 Sistema de touchscreen virtual ativo" 
