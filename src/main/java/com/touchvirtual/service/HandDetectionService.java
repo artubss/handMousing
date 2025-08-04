@@ -1,11 +1,14 @@
+
 package com.touchvirtual.service;
 
 import com.touchvirtual.model.HandLandmark;
 import com.touchvirtual.config.CameraConfig;
-import org.opencv.core.*;
-import org.opencv.videoio.VideoCapture;
-import org.opencv.videoio.Videoio;
-import org.opencv.imgproc.Imgproc;
+import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.bytedeco.javacv.Java2DFrameConverter;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.OpenCVFrameGrabber;
+import org.bytedeco.opencv.opencv_core.*;
+import org.bytedeco.opencv.opencv_imgproc.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
@@ -21,12 +24,16 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
+import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.bytedeco.opencv.global.opencv_imgproc.*;
+
 /**
- * Serviço principal de detecção de mãos usando OpenCV
+ * Serviço principal de detecção de mãos usando JavaCV
  *
  * @author TouchVirtual Team
  * @version 1.0.0
  */
+
 @Service
 public class HandDetectionService {
 
@@ -35,7 +42,8 @@ public class HandDetectionService {
     @Autowired
     private CameraConfig cameraConfig;
 
-    private VideoCapture videoCapture;
+    private OpenCVFrameGrabber frameGrabber;
+    private OpenCVFrameConverter.ToMat converter;
     private Mat frame;
     private ScheduledExecutorService executor;
     private AtomicBoolean isRunning;
@@ -51,6 +59,7 @@ public class HandDetectionService {
         this.isInitialized = new AtomicBoolean(false);
         this.lastDetectedLandmarks = new ArrayList<>();
         this.lastDetectionConfidence = 0.0;
+        this.converter = new OpenCVFrameConverter.ToMat();
 
         logger.info("✅ Serviço de detecção de mãos inicializado com sucesso");
     }
@@ -64,6 +73,45 @@ public class HandDetectionService {
     }
 
     /**
+     * Inicia o processamento de detecção de mãos
+     */
+    public void startHandDetection() {
+        logger.info("🎯 Iniciando detecção de mãos...");
+        startProcessing();
+    }
+
+    /**
+     * Para o processamento de detecção de mãos
+     */
+    public void stopHandDetection() {
+        logger.info("⏹️ Parando detecção de mãos...");
+        stopProcessing();
+    }
+
+    /**
+     * Verifica se o processamento está ativo
+     */
+    public boolean isProcessing() {
+        return isRunning.get();
+    }
+
+    /**
+     * Obtém informações de status da câmera
+     */
+    public String getCameraStatus() {
+        if (!isInitialized.get()) {
+            return "Câmera não inicializada";
+        }
+        if (frameGrabber == null) {
+            return "Câmera não disponível";
+        }
+        return String.format("Câmera ativa: %dx%d @ %dfps", 
+                           frameGrabber.getImageWidth(), 
+                           frameGrabber.getImageHeight(), 
+                           frameGrabber.getFrameRate());
+    }
+
+    /**
      * Inicializa a captura de vídeo de forma lazy
      */
     private synchronized void initializeVideoCapture() {
@@ -73,40 +121,41 @@ public class HandDetectionService {
 
         try {
             logger.info("📹 Inicializando câmera...");
-            videoCapture = new VideoCapture(cameraConfig.getDeviceIndex());
+            frameGrabber = new OpenCVFrameGrabber(cameraConfig.getDeviceIndex());
 
-            if (!videoCapture.isOpened()) {
+            // Configura as propriedades da câmera
+            frameGrabber.setImageWidth(cameraConfig.getFrameWidth());
+            frameGrabber.setImageHeight(cameraConfig.getFrameHeight());
+            frameGrabber.setFrameRate(cameraConfig.getFps());
+
+            frameGrabber.start();
+
+            // Verifica se a câmera foi iniciada corretamente
+            if (frameGrabber.getImageWidth() <= 0) {
                 logger.warn("⚠️ Não foi possível abrir a câmera no índice {}", cameraConfig.getDeviceIndex());
                 // Tenta outros índices de câmera
                 for (int i = 0; i < 3; i++) {
                     if (i != cameraConfig.getDeviceIndex()) {
                         logger.info("🔄 Tentando câmera no índice {}", i);
-                        videoCapture.release();
-                        videoCapture = new VideoCapture(i);
-                        if (videoCapture.isOpened()) {
+                        frameGrabber.stop();
+                        frameGrabber.release();
+                        frameGrabber = new OpenCVFrameGrabber(i);
+                        frameGrabber.setImageWidth(cameraConfig.getFrameWidth());
+                        frameGrabber.setImageHeight(cameraConfig.getFrameHeight());
+                        frameGrabber.setFrameRate(cameraConfig.getFps());
+                        frameGrabber.start();
+                        if (frameGrabber.getImageWidth() > 0) {
                             logger.info("✅ Câmera encontrada no índice {}", i);
                             break;
                         }
                     }
                 }
 
-                if (!videoCapture.isOpened()) {
+                if (frameGrabber.getImageWidth() <= 0) {
                     logger.error("❌ Nenhuma câmera disponível encontrada");
                     return;
                 }
             }
-
-            // Configura as propriedades da câmera
-            videoCapture.set(Videoio.CAP_PROP_FRAME_WIDTH, cameraConfig.getFrameWidth());
-            videoCapture.set(Videoio.CAP_PROP_FRAME_HEIGHT, cameraConfig.getFrameHeight());
-            videoCapture.set(Videoio.CAP_PROP_FPS, cameraConfig.getFps());
-
-            if (!cameraConfig.isAutoExposure()) {
-                videoCapture.set(Videoio.CAP_PROP_AUTO_EXPOSURE, 0);
-                videoCapture.set(Videoio.CAP_PROP_EXPOSURE, cameraConfig.getExposure());
-            }
-
-            videoCapture.set(Videoio.CAP_PROP_GAIN, cameraConfig.getGain());
 
             frame = new Mat();
 
@@ -177,25 +226,36 @@ public class HandDetectionService {
      * Processa um frame da câmera
      */
     private void processFrame() {
-        if (!isInitialized.get() || videoCapture == null || !videoCapture.isOpened()) {
+        if (!isInitialized.get() || frameGrabber == null || frameGrabber.getImageWidth() <= 0) {
             return;
         }
 
-        if (videoCapture.read(frame)) {
-            // Pré-processamento do frame
-            Mat processedFrame = preprocessFrame(frame);
+        try {
+            Frame grabbedFrame = frameGrabber.grab();
+            if (grabbedFrame != null) {
+                // Converte Frame para Mat
+                Mat inputFrame = converter.convert(grabbedFrame);
+                
+                if (inputFrame != null && !inputFrame.empty()) {
+                    // Pré-processamento do frame
+                    Mat processedFrame = preprocessFrame(inputFrame);
 
-            // Detecta mãos no frame
-            List<HandLandmark> landmarks = detectHands(processedFrame);
+                    // Detecta mãos no frame
+                    List<HandLandmark> landmarks = detectHands(processedFrame);
 
-            // Atualiza os landmarks detectados
-            synchronized (this) {
-                lastDetectedLandmarks = landmarks;
-                lastDetectionConfidence = calculateConfidence(landmarks);
+                    // Atualiza os landmarks detectados
+                    synchronized (this) {
+                        lastDetectedLandmarks = landmarks;
+                        lastDetectionConfidence = calculateConfidence(landmarks);
+                    }
+
+                    // Libera recursos
+                    processedFrame.release();
+                    inputFrame.release();
+                }
             }
-
-            // Libera recursos
-            processedFrame.release();
+        } catch (Exception e) {
+            logger.error("❌ Erro ao processar frame: {}", e.getMessage());
         }
     }
 
@@ -206,13 +266,13 @@ public class HandDetectionService {
         Mat processed = new Mat();
 
         // Converte para escala de cinza
-        Imgproc.cvtColor(inputFrame, processed, Imgproc.COLOR_BGR2GRAY);
+        cvtColor(inputFrame, processed, COLOR_BGR2GRAY);
 
         // Aplica filtro Gaussiano para reduzir ruído
-        Imgproc.GaussianBlur(processed, processed, new Size(5, 5), 0);
+        GaussianBlur(processed, processed, new Size(5, 5), 0);
 
         // Aplica equalização de histograma para melhorar contraste
-        Imgproc.equalizeHist(processed, processed);
+        equalizeHist(processed, processed);
 
         return processed;
     }
@@ -229,18 +289,20 @@ public class HandDetectionService {
 
             // Detecta contornos na imagem
             Mat edges = new Mat();
-            Imgproc.Canny(frame, edges, 50, 150);
+            Canny(frame, edges, 50, 150);
 
-            List<MatOfPoint> contours = new ArrayList<>();
-            Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+            MatVector contours = new MatVector();
+            Mat hierarchy = new Mat();
+            findContours(edges, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
 
             // Filtra contornos que podem ser mãos
-            for (MatOfPoint contour : contours) {
-                double area = Imgproc.contourArea(contour);
+            for (long i = 0; i < contours.size(); i++) {
+                Mat contour = contours.get(i);
+                double area = contourArea(contour);
 
                 // Filtra por área (mãos têm área específica)
                 if (area > 1000 && area < 50000) {
-                    Rect boundingRect = Imgproc.boundingRect(contour);
+                    Rect boundingRect = boundingRect(contour);
 
                     // Simula landmarks da mão baseado no retângulo
                     landmarks.addAll(generateHandLandmarks(boundingRect, frame.size()));
@@ -248,6 +310,7 @@ public class HandDetectionService {
             }
 
             edges.release();
+            hierarchy.release();
 
         } catch (Exception e) {
             logger.error("❌ Erro na detecção de mãos: {}", e.getMessage());
@@ -263,12 +326,12 @@ public class HandDetectionService {
         List<HandLandmark> landmarks = new ArrayList<>();
 
         // Pontos simulados da mão (21 landmarks como MediaPipe)
-        double centerX = boundingRect.x + boundingRect.width / 2.0;
-        double centerY = boundingRect.y + boundingRect.height / 2.0;
+        double centerX = boundingRect.x() + boundingRect.width() / 2.0;
+        double centerY = boundingRect.y() + boundingRect.height() / 2.0;
 
         // Normaliza coordenadas para 0-1
-        double normalizedCenterX = centerX / frameSize.width;
-        double normalizedCenterY = centerY / frameSize.height;
+        double normalizedCenterX = centerX / frameSize.width();
+        double normalizedCenterY = centerY / frameSize.height();
 
         // Gera 21 landmarks simulados
         for (int i = 0; i < 21; i++) {
@@ -341,8 +404,13 @@ public class HandDetectionService {
      * Libera recursos da câmera
      */
     private void releaseResources() {
-        if (videoCapture != null) {
-            videoCapture.release();
+        if (frameGrabber != null) {
+            try {
+                frameGrabber.stop();
+                frameGrabber.release();
+            } catch (Exception e) {
+                logger.error("❌ Erro ao liberar recursos da câmera: {}", e.getMessage());
+            }
         }
         if (frame != null) {
             frame.release();

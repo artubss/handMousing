@@ -424,6 +424,9 @@
       // Inicializa gráficos
       initCharts();
 
+      // Inicia automaticamente a detecção de mãos
+      startHandDetection();
+
       // Atualiza status inicial
       updateDashboardStatus();
 
@@ -438,5 +441,56 @@
         updateCalibrationStatus(dashboardData.calibrated);
       }
     });
+
+    // Função para iniciar detecção de mãos
+    function startHandDetection() {
+      fetch("/api/detection/start", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            console.log("✅ Detecção de mãos iniciada");
+            showNotification("Detecção de mãos iniciada", "success");
+          } else {
+            console.error("❌ Erro ao iniciar detecção:", data.error);
+            showNotification(
+              "Erro ao iniciar detecção: " + data.error,
+              "error"
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("❌ Erro ao iniciar detecção:", error);
+          showNotification("Erro ao iniciar detecção", "error");
+        });
+    }
+
+    // Função para parar detecção de mãos
+    function stopHandDetection() {
+      fetch("/api/detection/stop", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            console.log("⏹️ Detecção de mãos parada");
+            showNotification("Detecção de mãos parada", "success");
+          } else {
+            console.error("❌ Erro ao parar detecção:", data.error);
+            showNotification("Erro ao parar detecção: " + data.error, "error");
+          }
+        })
+        .catch((error) => {
+          console.error("❌ Erro ao parar detecção:", error);
+          showNotification("Erro ao parar detecção", "error");
+        });
+    }
   </script>
 </div>

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Queue;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import com.touchvirtual.service.HandDetectionService;
 
 /**
  * Serviço de reconhecimento de gestos baseado nos landmarks detectados

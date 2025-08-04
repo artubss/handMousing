@@ -173,16 +173,77 @@ public class WebController {
 
         try {
             mouseSimulationService.setEnabled(enabled);
-            response.put("status", "success");
-            response.put("mouseEnabled", mouseSimulationService.isEnabled());
-            response.put("message", enabled ? "Mouse habilitado" : "Mouse desabilitado");
-
-            logger.info("🤖 Mouse {}", enabled ? "habilitado" : "desabilitado");
+            response.put("success", true);
+            response.put("enabled", mouseSimulationService.isEnabled());
+            response.put("message", enabled ? "Mouse virtual habilitado" : "Mouse virtual desabilitado");
 
         } catch (Exception e) {
-            logger.error("❌ Erro ao alterar estado do mouse: {}", e.getMessage());
-            response.put("status", "error");
-            response.put("message", e.getMessage());
+            logger.error("❌ Erro ao alternar mouse virtual: {}", e.getMessage());
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    @PostMapping("/api/detection/start")
+    @ResponseBody
+    public Map<String, Object> startDetection() {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            handDetectionService.startHandDetection();
+            response.put("success", true);
+            response.put("message", "Detecção de mãos iniciada");
+            response.put("processing", handDetectionService.isProcessing());
+
+        } catch (Exception e) {
+            logger.error("❌ Erro ao iniciar detecção: {}", e.getMessage());
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    @PostMapping("/api/detection/stop")
+    @ResponseBody
+    public Map<String, Object> stopDetection() {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            handDetectionService.stopHandDetection();
+            response.put("success", true);
+            response.put("message", "Detecção de mãos parada");
+            response.put("processing", handDetectionService.isProcessing());
+
+        } catch (Exception e) {
+            logger.error("❌ Erro ao parar detecção: {}", e.getMessage());
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    @GetMapping("/api/detection/status")
+    @ResponseBody
+    public Map<String, Object> getDetectionStatus() {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            response.put("success", true);
+            response.put("cameraInitialized", handDetectionService.isCameraInitialized());
+            response.put("processing", handDetectionService.isProcessing());
+            response.put("handDetected", handDetectionService.isHandDetected());
+            response.put("handCount", handDetectionService.getHandCount());
+            response.put("confidence", handDetectionService.getLastDetectionConfidence());
+            response.put("cameraStatus", handDetectionService.getCameraStatus());
+
+        } catch (Exception e) {
+            logger.error("❌ Erro ao obter status da detecção: {}", e.getMessage());
+            response.put("success", false);
+            response.put("error", e.getMessage());
         }
 
         return response;

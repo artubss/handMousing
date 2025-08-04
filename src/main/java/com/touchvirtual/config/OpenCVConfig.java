@@ -27,11 +27,11 @@ public class OpenCVConfig {
             // Carrega as bibliotecas nativas do JavaCV
             // O JavaCV carrega automaticamente as bibliotecas nativas do OpenCV
             // mas precisamos garantir que estão disponíveis
-            
+
             // Verifica se o OpenCV está disponível
             logger.info("✅ OpenCV carregado com sucesso via JavaCV");
             logger.info("📹 JavaCV carregado com sucesso");
-            
+
             // Testa se as bibliotecas estão funcionando
             testOpenCVFunctionality();
 
@@ -50,7 +50,7 @@ public class OpenCVConfig {
             // Testa conversores
             OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
             logger.info("✅ Teste de conversores JavaCV: OK");
-            
+
         } catch (Exception e) {
             logger.error("❌ Teste de funcionalidade OpenCV falhou: {}", e.getMessage());
             throw new RuntimeException("Teste de funcionalidade OpenCV falhou", e);
@@ -62,12 +62,12 @@ public class OpenCVConfig {
     public String openCVVersion() {
         return "OpenCV via JavaCV";
     }
-    
+
     @Bean
     public OpenCVFrameConverter.ToMat openCVFrameConverter() {
         return new OpenCVFrameConverter.ToMat();
     }
-    
+
     @Bean
     public Java2DFrameConverter java2DFrameConverter() {
         return new Java2DFrameConverter();
