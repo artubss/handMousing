@@ -1,0 +1,57 @@
+# Configurações do Spring Boot
+server:
+  port: 8081
+
+spring:
+  application:
+    name: touch-virtual
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
+# Configurações de logging
+logging:
+  level:
+    com.touchvirtual: INFO
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Configurações do OpenCV e câmera
+camera:
+  device-index: 0
+  frame-width: 640
+  frame-height: 480
+  fps: 30
+  auto-exposure: true
+  exposure: -6
+  gain: 0
+
+# Configurações de detecção de gestos
+gesture:
+  min-confidence: 0.5
+  smoothing-factor: 0.8
+  detection-interval: 33
+
+# Configurações de mapeamento de coordenadas
+mapping:
+  screen-width: 1920
+  screen-height: 1080
+  calibration-points: 9
+
+# Configurações do WebSocket
+websocket:
+  max-text-message-size: 8192
+  max-binary-message-size: 8192
+
+# Configurações de atuador
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always 
