@@ -24,7 +24,7 @@ public class TestController {
     @Autowired
     private HandDetectionService handDetectionService;
 
-    @GetMapping("/")
+    @GetMapping("/status")
     public String home() {
         return "🎯 Touch Virtual - Sistema de Touchscreen Virtual<br>"
                 + "📱 Acesse: <a href='/test'>/test</a> para verificar o status<br>"

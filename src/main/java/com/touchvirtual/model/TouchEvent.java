@@ -2,6 +2,7 @@ package com.touchvirtual.model;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Representa um evento de toque simulado na tela
@@ -50,7 +51,7 @@ public class TouchEvent {
     }
     
     private String generateId() {
-        return "event_" + System.currentTimeMillis() + "_" + (int)(Math.random() * 1000);
+        return "event_" + System.currentTimeMillis() + "_" + (int)(ThreadLocalRandom.current().nextDouble() * 1000);
     }
     
     // Getters e Setters
@@ -96,7 +97,7 @@ public class TouchEvent {
     
     @Override
     public String toString() {
-        return String.format("TouchEvent{id='%s', gesture=%s, pos=(%d,%d), type=%s, time=%s}", 
-                           id, gestureType, screenX, screenY, eventType, timestamp);
+        return "TouchEvent{id='%s', gesture=%s, pos=(%d,%d), type=%s, time=%s}".formatted(
+                id, gestureType, screenX, screenY, eventType, timestamp);
     }
 } 

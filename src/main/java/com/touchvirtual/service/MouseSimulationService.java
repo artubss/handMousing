@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -57,6 +58,12 @@ public class MouseSimulationService {
      */
     private void initializeRobot() {
         try {
+            // Verifica se o ambiente suporta GUI
+            if (GraphicsEnvironment.isHeadless()) {
+                logger.warn("⚠️ Ambiente headless detectado - Robot não disponível");
+                return;
+            }
+
             robot = new Robot();
             robot.setAutoDelay(0); // Sem delay automático
             robot.setAutoWaitForIdle(false); // Não espera idle

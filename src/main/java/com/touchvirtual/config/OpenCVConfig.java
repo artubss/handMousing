@@ -37,7 +37,7 @@ public class OpenCVConfig {
 
     @Bean
     @Primary
-    public String openCVVersion() {
+    String openCVVersion() {
         return Core.VERSION;
     }
 }

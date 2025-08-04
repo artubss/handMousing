@@ -20,7 +20,7 @@ public class UserSettingsConfig {
 
     @Bean
     @Primary
-    public UserSettings userSettings() {
+    UserSettings userSettings() {
         UserSettings settings = new UserSettings();
 
         // Configurações padrão

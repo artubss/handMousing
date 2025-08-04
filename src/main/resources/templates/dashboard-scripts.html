@@ -1,0 +1,442 @@
+<!-- Scripts do Dashboard -->
+<div th:fragment="scripts">
+  <script>
+    // Dados do dashboard
+    const dashboardData = /*[[${dashboardData}]]*/ {};
+
+    // Charts
+    let performanceChart = null;
+    let gestureChart = null;
+
+    // Dados para gráficos
+    let performanceData = {
+      labels: [],
+      fps: [],
+      latency: [],
+      confidence: [],
+    };
+
+    let gestureData = {
+      labels: [
+        "Click",
+        "Right Click",
+        "Double Click",
+        "Drag",
+        "Scroll",
+        "Zoom",
+        "Outros",
+      ],
+      data: [0, 0, 0, 0, 0, 0, 0],
+    };
+
+    // Contadores
+    let gesturesPerMinute = 0;
+    let gestureCounter = 0;
+    let lastGestureTime = Date.now();
+    let recentGestures = [];
+
+    // Inicializa gráficos
+    function initCharts() {
+      // Performance Chart
+      const performanceCtx = document
+        .getElementById("performanceChart")
+        .getContext("2d");
+      performanceChart = new Chart(performanceCtx, {
+        type: "line",
+        data: {
+          labels: performanceData.labels,
+          datasets: [
+            {
+              label: "FPS",
+              data: performanceData.fps,
+              borderColor: "#6366f1",
+              backgroundColor: "rgba(99, 102, 241, 0.1)",
+              tension: 0.4,
+            },
+            {
+              label: "Confiança (%)",
+              data: performanceData.confidence,
+              borderColor: "#10b981",
+              backgroundColor: "rgba(16, 185, 129, 0.1)",
+              tension: 0.4,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+          plugins: {
+            legend: {
+              position: "top",
+            },
+          },
+        },
+      });
+
+      // Gesture Chart
+      const gestureCtx = document
+        .getElementById("gestureChart")
+        .getContext("2d");
+      gestureChart = new Chart(gestureCtx, {
+        type: "doughnut",
+        data: {
+          labels: gestureData.labels,
+          datasets: [
+            {
+              data: gestureData.data,
+              backgroundColor: [
+                "#6366f1",
+                "#8b5cf6",
+                "#f59e0b",
+                "#ef4444",
+                "#10b981",
+                "#06b6d4",
+                "#6b7280",
+              ],
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+            },
+          },
+        },
+      });
+    }
+
+    // Atualiza status do dashboard
+    function updateDashboardStatus() {
+      fetch("/api/status")
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            updateCameraStatus(data.cameraInitialized);
+            updateHandStatus(data.handDetected);
+            updateMouseStatus(data.mouseEnabled);
+            updateCalibrationStatus(data.calibrated);
+            updatePerformanceMetrics(data);
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao obter status:", error);
+        });
+    }
+
+    function updateCameraStatus(initialized) {
+      const statusIndicator = document.getElementById("dashboardCameraStatus");
+      const statusText = document.getElementById("dashboardCameraText");
+
+      if (initialized) {
+        statusIndicator.className = "status-indicator status-online";
+        statusText.textContent = "Inicializada";
+      } else {
+        statusIndicator.className = "status-indicator status-offline";
+        statusText.textContent = "Não inicializada";
+      }
+    }
+
+    function updateHandStatus(detected) {
+      const statusIndicator = document.getElementById("dashboardHandStatus");
+      const statusText = document.getElementById("dashboardHandText");
+
+      if (detected) {
+        statusIndicator.className = "status-indicator status-online";
+        statusText.textContent = "Detectada";
+      } else {
+        statusIndicator.className = "status-indicator status-offline";
+        statusText.textContent = "Não detectada";
+      }
+    }
+
+    function updateMouseStatus(enabled) {
+      const statusIndicator = document.getElementById("dashboardMouseStatus");
+      const statusText = document.getElementById("dashboardMouseText");
+      const toggleText = document.getElementById("mouseToggleText");
+
+      if (enabled) {
+        statusIndicator.className = "status-indicator status-online";
+        statusText.textContent = "Habilitado";
+        toggleText.textContent = "Desabilitar Mouse";
+      } else {
+        statusIndicator.className = "status-indicator status-offline";
+        statusText.textContent = "Desabilitado";
+        toggleText.textContent = "Habilitar Mouse";
+      }
+    }
+
+    function updateCalibrationStatus(calibrated) {
+      const statusIndicator = document.getElementById(
+        "dashboardCalibrationStatus"
+      );
+      const statusText = document.getElementById("dashboardCalibrationText");
+
+      if (calibrated) {
+        statusIndicator.className = "status-indicator status-online";
+        statusText.textContent = "Calibrado";
+      } else {
+        statusIndicator.className = "status-indicator status-warning";
+        statusText.textContent = "Não calibrado";
+      }
+    }
+
+    function updatePerformanceMetrics(data) {
+      // Atualiza valores
+      document.getElementById("fpsValue").textContent = data.fps || "--";
+      document.getElementById("latencyValue").textContent =
+        (data.latency || "--") + " ms";
+
+      const confidence = Math.round((data.confidence || 0) * 100);
+      document.getElementById("confidenceValue").textContent = confidence + "%";
+      document.getElementById("confidenceBar").style.width = confidence + "%";
+
+      // Atualiza gráfico de performance
+      const now = new Date().toLocaleTimeString();
+      performanceData.labels.push(now);
+      performanceData.fps.push(data.fps || 0);
+      performanceData.confidence.push(confidence);
+
+      // Mantém apenas os últimos 20 pontos
+      if (performanceData.labels.length > 20) {
+        performanceData.labels.shift();
+        performanceData.fps.shift();
+        performanceData.confidence.shift();
+      }
+
+      if (performanceChart) {
+        performanceChart.update();
+      }
+
+      // Atualiza última atualização
+      document.getElementById("lastUpdate").textContent = now;
+    }
+
+    // Funções de controle
+    function toggleMouse() {
+      const currentStatus =
+        document.getElementById("dashboardMouseText").textContent ===
+        "Habilitado";
+      const newStatus = !currentStatus;
+
+      fetch("/api/mouse/toggle", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: `enabled=${newStatus}`,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            updateMouseStatus(data.mouseEnabled);
+            showNotification(data.message, "success");
+          } else {
+            showNotification("Erro ao alterar estado do mouse", "error");
+          }
+        })
+        .catch((error) => {
+          console.error("Erro:", error);
+          showNotification("Erro ao alterar estado do mouse", "error");
+        });
+    }
+
+    function startCalibration() {
+      const sessionId = "dashboard_" + Date.now();
+
+      fetch("/api/calibration/start", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: `sessionId=${sessionId}`,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            showNotification("Calibração iniciada", "success");
+            // Redireciona para página de calibração
+            setTimeout(() => {
+              window.location.href = "/calibration";
+            }, 1000);
+          } else {
+            showNotification("Erro ao iniciar calibração", "error");
+          }
+        })
+        .catch((error) => {
+          console.error("Erro:", error);
+          showNotification("Erro ao iniciar calibração", "error");
+        });
+    }
+
+    function resetStats() {
+      gestureData.data = [0, 0, 0, 0, 0, 0, 0];
+      gestureCounter = 0;
+      gesturesPerMinute = 0;
+      recentGestures = [];
+
+      if (gestureChart) {
+        gestureChart.update();
+      }
+
+      document.getElementById("gesturesPerMinute").textContent = "--";
+      document.getElementById("recentGestures").innerHTML =
+        '<p class="text-muted">Nenhum gesto detectado ainda...</p>';
+
+      showNotification("Estatísticas resetadas", "success");
+    }
+
+    function refreshDashboard() {
+      updateDashboardStatus();
+      showNotification("Dashboard atualizado", "success");
+    }
+
+    function exportData() {
+      const data = {
+        timestamp: new Date().toISOString(),
+        performance: performanceData,
+        gestures: gestureData,
+        stats: {
+          gesturesPerMinute,
+          gestureCounter,
+          recentGestures,
+        },
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `touch-virtual-dashboard-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      showNotification("Dados exportados com sucesso", "success");
+    }
+
+    function showNotification(message, type) {
+      // Cria notificação simples
+      const notification = document.createElement("div");
+      notification.className = `alert alert-${
+        type === "success" ? "success" : "danger"
+      } alert-dismissible fade show position-fixed`;
+      notification.style.cssText =
+        "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+      notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+      document.body.appendChild(notification);
+
+      // Remove após 3 segundos
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 3000);
+    }
+
+    // Override das funções do WebSocket
+    function handleGestureUpdate(data) {
+      if (data.gestureType && data.gestureType.displayName) {
+        // Adiciona à lista de gestos recentes
+        recentGestures.unshift({
+          gesture: data.gestureType.displayName,
+          confidence: data.confidence,
+          timestamp: new Date().toLocaleTimeString(),
+        });
+
+        // Mantém apenas os últimos 5 gestos
+        if (recentGestures.length > 5) {
+          recentGestures.pop();
+        }
+
+        // Atualiza lista de gestos recentes
+        const recentGesturesDiv = document.getElementById("recentGestures");
+        if (recentGestures.length > 0) {
+          recentGesturesDiv.innerHTML = recentGestures
+            .map(
+              (gesture) =>
+                `<div class="mb-2">
+                            <strong>${gesture.gesture}</strong> 
+                            <small class="text-muted">(${gesture.confidence.toFixed(
+                              1
+                            )}%)</small>
+                            <br><small class="text-muted">${
+                              gesture.timestamp
+                            }</small>
+                        </div>`
+            )
+            .join("");
+        }
+
+        // Atualiza contadores
+        gestureCounter++;
+        const now = Date.now();
+        const timeDiff = (now - lastGestureTime) / 1000 / 60; // minutos
+        if (timeDiff > 0) {
+          gesturesPerMinute = Math.round(gestureCounter / timeDiff);
+        }
+
+        document.getElementById("gesturesPerMinute").textContent =
+          gesturesPerMinute;
+
+        // Atualiza gráfico de gestos (simplificado)
+        const gestureName = data.gestureType.displayName.toLowerCase();
+        if (gestureName.includes("click")) {
+          gestureData.data[0]++;
+        } else if (gestureName.includes("right")) {
+          gestureData.data[1]++;
+        } else if (gestureName.includes("double")) {
+          gestureData.data[2]++;
+        } else if (gestureName.includes("drag")) {
+          gestureData.data[3]++;
+        } else if (gestureName.includes("scroll")) {
+          gestureData.data[4]++;
+        } else if (gestureName.includes("zoom")) {
+          gestureData.data[5]++;
+        } else {
+          gestureData.data[6]++;
+        }
+
+        if (gestureChart) {
+          gestureChart.update();
+        }
+      }
+    }
+
+    function handlePerformanceUpdate(data) {
+      updatePerformanceMetrics(data);
+    }
+
+    // Inicialização
+    document.addEventListener("DOMContentLoaded", function () {
+      // Inicializa gráficos
+      initCharts();
+
+      // Atualiza status inicial
+      updateDashboardStatus();
+
+      // Atualiza status a cada 2 segundos
+      setInterval(updateDashboardStatus, 2000);
+
+      // Inicializa com dados do servidor se disponíveis
+      if (dashboardData) {
+        updateCameraStatus(dashboardData.cameraInitialized);
+        updateHandStatus(dashboardData.handDetected);
+        updateMouseStatus(dashboardData.mouseEnabled);
+        updateCalibrationStatus(dashboardData.calibrated);
+      }
+    });
+  </script>
+</div>

@@ -27,7 +27,7 @@ public class CameraConfig {
     private double gain = 0.0;
 
     @Bean
-    public CameraConfig cameraSettings() {
+    CameraConfig cameraSettings() {
         logger.info("📹 Configuração da câmera:");
         logger.info("   - Dispositivo: {}", deviceIndex);
         logger.info("   - Resolução: {}x{}", frameWidth, frameHeight);

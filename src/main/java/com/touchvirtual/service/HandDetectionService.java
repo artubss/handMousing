@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -273,10 +274,10 @@ public class HandDetectionService {
         for (int i = 0; i < 21; i++) {
             HandLandmark landmark = new HandLandmark();
             landmark.setId(i);
-            landmark.setX(normalizedCenterX + (Math.random() - 0.5) * 0.1);
-            landmark.setY(normalizedCenterY + (Math.random() - 0.5) * 0.1);
+            landmark.setX(normalizedCenterX + (ThreadLocalRandom.current().nextDouble() - 0.5) * 0.1);
+            landmark.setY(normalizedCenterY + (ThreadLocalRandom.current().nextDouble() - 0.5) * 0.1);
             landmark.setZ(0.0);
-            landmark.setConfidence(0.8 + Math.random() * 0.2);
+            landmark.setConfidence(0.8 + ThreadLocalRandom.current().nextDouble() * 0.2);
 
             landmarks.add(landmark);
         }

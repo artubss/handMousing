@@ -80,7 +80,7 @@ public class HandLandmark {
     
     @Override
     public String toString() {
-        return String.format("HandLandmark{id=%d, x=%.2f, y=%.2f, z=%.2f, conf=%.2f}", 
-                           id, x, y, z, confidence);
+        return "HandLandmark{id=%d, x=%.2f, y=%.2f, z=%.2f, conf=%.2f}".formatted(
+                id, x, y, z, confidence);
     }
 } 

@@ -1,0 +1,160 @@
+<!-- Scripts para a página de teste -->
+<div th:fragment="test-scripts">
+  <script>
+    $(document).ready(function () {
+      console.log("📋 Página de teste carregada");
+
+      // Atualiza status inicial
+      updateStatus();
+
+      // Atualiza status a cada 5 segundos
+      setInterval(updateStatus, 5000);
+    });
+
+    function updateStatus() {
+      $.ajax({
+        url: "/api/status",
+        method: "GET",
+        success: function (data) {
+          if (data.status === "success") {
+            updateStatusBadge("cameraStatus", data.cameraInitialized);
+            updateStatusBadge("handStatus", data.handDetected);
+            updateStatusBadge("mouseStatus", data.mouseEnabled);
+            updateStatusBadge("calibrationStatus", data.calibrated);
+          }
+        },
+        error: function () {
+          addLogMessage("❌ Erro ao obter status", "text-danger");
+        },
+      });
+    }
+
+    function updateStatusBadge(elementId, status) {
+      const element = $("#" + elementId);
+      if (status) {
+        element
+          .removeClass("bg-warning bg-danger")
+          .addClass("bg-success")
+          .text("OK");
+      } else {
+        element
+          .removeClass("bg-success bg-danger")
+          .addClass("bg-warning")
+          .text("Pendente");
+      }
+    }
+
+    function addLogMessage(message, className = "text-info") {
+      const logDiv = $("#testLog");
+      const timestamp = new Date().toLocaleTimeString();
+      logDiv.append(
+        `<div class="${className}">[${timestamp}] ${message}</div>`
+      );
+      logDiv.scrollTop(logDiv[0].scrollHeight);
+    }
+
+    function testCamera() {
+      addLogMessage("📹 Testando câmera...", "text-info");
+
+      $.ajax({
+        url: "/api/status",
+        method: "GET",
+        success: function (data) {
+          if (data.cameraInitialized) {
+            addLogMessage("✅ Câmera funcionando corretamente", "text-success");
+          } else {
+            addLogMessage("❌ Câmera não inicializada", "text-danger");
+          }
+        },
+        error: function () {
+          addLogMessage("❌ Erro ao testar câmera", "text-danger");
+        },
+      });
+    }
+
+    function testHandDetection() {
+      addLogMessage("🤚 Testando detecção de mãos...", "text-info");
+
+      $.ajax({
+        url: "/api/status",
+        method: "GET",
+        success: function (data) {
+          if (data.handDetected) {
+            addLogMessage(
+              `✅ Mão detectada (${
+                data.handCount
+              } mãos, confiança: ${Math.round(data.confidence * 100)}%)`,
+              "text-success"
+            );
+          } else {
+            addLogMessage("⚠️ Nenhuma mão detectada", "text-warning");
+          }
+        },
+        error: function () {
+          addLogMessage("❌ Erro ao testar detecção", "text-danger");
+        },
+      });
+    }
+
+    function testMouse() {
+      addLogMessage("🖱️ Testando mouse virtual...", "text-info");
+
+      $.ajax({
+        url: "/api/status",
+        method: "GET",
+        success: function (data) {
+          if (data.mouseEnabled) {
+            addLogMessage("✅ Mouse virtual habilitado", "text-success");
+          } else {
+            addLogMessage("⚠️ Mouse virtual desabilitado", "text-warning");
+          }
+        },
+        error: function () {
+          addLogMessage("❌ Erro ao testar mouse", "text-danger");
+        },
+      });
+    }
+
+    function testCalibration() {
+      addLogMessage("🎯 Testando calibração...", "text-info");
+
+      $.ajax({
+        url: "/api/status",
+        method: "GET",
+        success: function (data) {
+          if (data.calibrated) {
+            addLogMessage("✅ Sistema calibrado", "text-success");
+          } else {
+            addLogMessage(
+              "⚠️ Sistema não calibrado - execute a calibração",
+              "text-warning"
+            );
+          }
+        },
+        error: function () {
+          addLogMessage("❌ Erro ao testar calibração", "text-danger");
+        },
+      });
+    }
+
+    // Teste automático ao carregar a página
+    $(document).ready(function () {
+      setTimeout(function () {
+        addLogMessage("🚀 Iniciando testes automáticos...", "text-info");
+        testCamera();
+
+        setTimeout(function () {
+          testHandDetection();
+        }, 1000);
+
+        setTimeout(function () {
+          testMouse();
+        }, 2000);
+
+        setTimeout(function () {
+          testCalibration();
+        }, 3000);
+      }, 1000);
+    });
+  </script>
+</div>

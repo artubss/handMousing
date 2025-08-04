@@ -263,8 +263,8 @@ public class OpenCVUtils {
      * Obtém informações da imagem
      */
     public static String getImageInfo(Mat mat) {
-        return String.format("Size: %dx%d, Type: %s, Channels: %d", 
-                           mat.rows(), mat.cols(), mat.type(), mat.channels());
+        return "Size: %dx%d, Type: %s, Channels: %d".formatted(
+                mat.rows(), mat.cols(), mat.type(), mat.channels());
     }
     
     /**
