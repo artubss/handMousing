@@ -2,7 +2,7 @@ package com.touchvirtual.util;
 
 import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.opencv_imgproc.*;
-import org.opencv.core.MatOfByte;
+import org.bytedeco.opencv.opencv_imgcodecs.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,11 +13,17 @@ import static org.bytedeco.opencv.global.opencv_core.*;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
 
-
-    
-private static final Logger logger = LoggerFactory.getLogger(OpenCVUtils.class);
-    
 /**
+ * Utilitários para OpenCV via JavaCV
+ *
+ * @author TouchVirtual Team
+ * @version 1.0.0
+ */
+public class OpenCVUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(OpenCVUtils.class);
+
+    /**
      * Converte Mat para array de bytes
      */
     public static byte[] matToBytes(Mat mat) {
@@ -25,15 +31,15 @@ private static final Logger logger = LoggerFactory.getLogger(OpenCVUtils.class);
         imencode(".jpg", mat, matOfByte);
         return matOfByte.get();
     }
-    
-/**
+
+    /**
      * Converte array de bytes para Mat
      */
     public static Mat bytesToMat(byte[] bytes) {
         return imdecode(new MatOfByte(bytes), IMREAD_COLOR);
     }
-    
-/**
+
+    /**
      * Redimensiona uma imagem
      */
     public static Mat resize(Mat input, int width, int height) {
@@ -41,8 +47,8 @@ private static final Logger logger = LoggerFactory.getLogger(OpenCVUtils.class);
         resize(input, output, new Size(width, height));
         return output;
     }
-    
-/**
+
+    /**
      * Aplica filtro Gaussiano
      */
     public static Mat applyGaussianBlur(Mat input, int kernelSize) {
@@ -50,8 +56,8 @@ private static final Logger logger = LoggerFactory.getLogger(OpenCVUtils.class);
         GaussianBlur(input, output, new Size(kernelSize, kernelSize), 0);
         return output;
     }
-    
-/**
+
+    /**
      * Aplica equalização de histograma
      */
     public static Mat applyHistogramEqualization(Mat input) {
@@ -59,8 +65,8 @@ private static final Logger logger = LoggerFactory.getLogger(OpenCVUtils.class);
         equalizeHist(input, output);
         return output;
     }
-    
-/**
+
+    /**
      * Detecta bordas usando Canny
      */
     public static Mat detectEdges(Mat input, double threshold1, double threshold2) {
@@ -68,8 +74,8 @@ private static final Logger logger = LoggerFactory.getLogger(OpenCVUtils.class);
         Canny(input, output, threshold1, threshold2);
         return output;
     }
-    
-/**
+
+    /**
      * Encontra contornos na imagem
      */
     public static MatVector findContours(Mat input) {
@@ -78,40 +84,22 @@ private static final Logger logger = LoggerFactory.getLogger(OpenCVUtils.class);
         findContours(input, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
         return contours;
     }
-    
-/**
-     * Desenha contornos na imagem
-     */
-    public static Mat drawContours(Mat input, MatVector contours, Scalar color) {
-        Mat output = input.clone();
-        drawContours(output, contours, -1, color, 2);
-        return output;
-    }
-    
-/**
+
+    /**
      * Calcula a área de um contorno
      */
     public static double calculateContourArea(Mat contour) {
         return contourArea(contour);
     }
-    
-/**
+
+    /**
      * Obtém o retângulo delimitador de um contorno
      */
     public static Rect getBoundingRect(Mat contour) {
         return boundingRect(contour);
     }
-    
-/**
-     * Desenha um retângulo na imagem
-     */
-    public static Mat drawRectangle(Mat input, Rect rect, Scalar color, int thickness) {
-        Mat output = input.clone();
-        rectangle(output, rect, color, thickness);
-        return output;
-    }
-    
-/**
+
+    /**
      * Converte BGR para HSV
      */
     public static Mat bgrToHsv(Mat input) {
@@ -119,8 +107,8 @@ private static final Logger logger = LoggerFactory.getLogger(OpenCVUtils.class);
         cvtColor(input, output, COLOR_BGR2HSV);
         return output;
     }
-    
-/**
+
+    /**
      * Converte BGR para escala de cinza
      */
     public static Mat bgrToGray(Mat input) {
@@ -128,8 +116,8 @@ private static final Logger logger = LoggerFactory.getLogger(OpenCVUtils.class);
         cvtColor(input, output, COLOR_BGR2GRAY);
         return output;
     }
-    
-/**
+
+    /**
      * Aplica threshold binário
      */
     public static Mat applyThreshold(Mat input, double threshold, double maxValue) {
@@ -137,18 +125,18 @@ private static final Logger logger = LoggerFactory.getLogger(OpenCVUtils.class);
         threshold(input, output, threshold, maxValue, THRESH_BINARY);
         return output;
     }
-    
-/**
+
+    /**
      * Aplica threshold adaptativo
      */
     public static Mat applyAdaptiveThreshold(Mat input, double maxValue, int blockSize, double C) {
         Mat output = new Mat();
-        adaptiveThreshold(input, output, maxValue, ADAPTIVE_THRESH_GAUSSIAN_C, 
-                         THRESH_BINARY, blockSize, C);
-                
+        adaptiveThreshold(input, output, maxValue, ADAPTIVE_THRESH_GAUSSIAN_C,
+                THRESH_BINARY, blockSize, C);
+        return output;
     }
-    
-/**
+
+    /**
      * Aplica operação morfológica
      */
     public static Mat applyMorphology(Mat input, int operation, Mat kernel) {
@@ -156,65 +144,25 @@ private static final Logger logger = LoggerFactory.getLogger(OpenCVUtils.class);
         morphologyEx(input, output, operation, kernel);
         return output;
     }
-    
-/**
+
+    /**
      * Cria kernel estruturante
      */
     public static Mat createStructuringElement(int shape, Size size) {
         return getStructuringElement(shape, size);
     }
-    
-/**
+
+    /**
      * Calcula o centro de massa de um contorno
      */
     public static Point calculateContourCenter(Mat contour) {
         // Implementação simplificada - usa o centro do retângulo delimitador
         Rect boundingRect = getBoundingRect(contour);
-        return new Point(boundingRect.x() + boundingRect.width() / 2.0, 
-                        boundingRect.y() + boundingRect.height() / 2.0)
-                
-    
-/**
-     * Calcula a convexidade de um contorno
-     */
-    public static Mat getConvexHull(Mat contour) {
-        Mat hull = new Mat();
-        convexHull(contour, hull);
-        return hull;
+        return new Point((int) (boundingRect.x() + boundingRect.width() / 2.0),
+                (int) (boundingRect.y() + boundingRect.height() / 2.0));
     }
-    
-/**
-     * Calcula defeitos de convexidade
-     */
-    public static Mat getConvexityDefects(Mat contour, Mat hull) {
-        Mat defects = new Mat();
-        convexityDefects(contour, hull, defects);
-        return defects;
-    }
-    
-/**
-     * Desenha pontos na imagem
-     */
-    public static Mat drawPoints(Mat input, List<Point> points, Scalar color, int radius) {
-        Mat output = input.clone();
-        for (Point point : points) {
-            circle(output, point, radius, color, -1);
-        }
-        return output;
-    }
-    
-/**
-     * Desenha linhas na imagem
-     */
-    public static Mat drawLines(Mat input, List<Point> points, Scalar color, int thickness) {
-        Mat output = input.clone();
-        for (int i = 0; i < points.size() - 1; i++) {
-            line(output, points.get(i), points.get(i + 1), color, thickness);
-        }
-        return output;
-    }
-    
-/**
+
+    /**
      * Calcula a distância entre dois pontos
      */
     public static double calculateDistance(Point p1, Point p2) {
@@ -222,51 +170,51 @@ private static final Logger logger = LoggerFactory.getLogger(OpenCVUtils.class);
         double dy = p1.y() - p2.y();
         return Math.sqrt(dx * dx + dy * dy);
     }
-    
-/**
+
+    /**
      * Calcula o ângulo entre três pontos
      */
     public static double calculateAngle(Point p1, Point p2, Point p3) {
         double a = calculateDistance(p1, p2);
         double b = calculateDistance(p2, p3);
         double c = calculateDistance(p1, p3);
-        
-if (a == 0 || b == 0) {
+
+        if (a == 0 || b == 0) {
             return 0.0;
         }
-        
-double cosAngle = (a * a + b * b - c * c) / (2 * a * b);
+
+        double cosAngle = (a * a + b * b - c * c) / (2 * a * b);
         cosAngle = Math.max(-1.0, Math.min(1.0, cosAngle)); // Clamp to [-1, 1]
-        
-return Math.acos(cosAngle) * 180.0 / Math.PI;
+
+        return Math.acos(cosAngle) * 180.0 / Math.PI;
     }
-    
-/**
+
+    /**
      * Filtra contornos por área
      */
     public static MatVector filterContoursByArea(MatVector contours, double minArea, double maxArea) {
         MatVector filtered = new MatVector();
-        
-for (long i = 0; i < contours.size(); i++) {
+
+        for (long i = 0; i < contours.size(); i++) {
             Mat contour = contours.get(i);
             double area = calculateContourArea(contour);
             if (area >= minArea && area <= maxArea) {
                 filtered.push_back(contour);
             }
         }
-        
-return filtered;
+
+        return filtered;
     }
-    
-/**
+
+    /**
      * Obtém informações da imagem
      */
     public static String getImageInfo(Mat mat) {
         return "Size: %dx%d, Type: %d, Channels: %d".formatted(
                 mat.rows(), mat.cols(), mat.type(), mat.channels());
     }
-    
-/**
+
+    /**
      * Libera recursos de uma lista de Mats
      */
     public static void releaseMats(List<Mat> mats) {
@@ -276,8 +224,8 @@ return filtered;
             }
         }
     }
-    
-/**
+
+    /**
      * Libera recursos de um array de Mats
      */
     public static void releaseMats(Mat... mats) {
@@ -287,4 +235,4 @@ return filtered;
             }
         }
     }
-} 
+}
