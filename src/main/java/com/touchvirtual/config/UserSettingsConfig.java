@@ -9,20 +9,20 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Configuração para UserSettings
- * 
+ *
  * @author TouchVirtual Team
  * @version 1.0.0
  */
 @Configuration
 public class UserSettingsConfig {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(UserSettingsConfig.class);
-    
+
     @Bean
     @Primary
     public UserSettings userSettings() {
         UserSettings settings = new UserSettings();
-        
+
         // Configurações padrão
         settings.setUserId("default");
         settings.setProfileName("Default Profile");
@@ -31,9 +31,9 @@ public class UserSettingsConfig {
         settings.setLeftHanded(false);
         settings.setEnableSound(true);
         settings.setEnableVibration(false);
-        
+
         logger.info("✅ UserSettings configurado com sucesso");
-        
+
         return settings;
     }
-} 
+}
