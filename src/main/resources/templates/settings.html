@@ -1,0 +1,156 @@
+<!-- Página de Configurações -->
+<div th:fragment="content">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h4><i class="fas fa-cog me-2"></i>Configurações do Sistema</h4>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="mb-0">Configurações da Câmera</h5>
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <label class="form-label" for="cameraDevice">Dispositivo da Câmera</label>
+                    <select class="form-select" id="cameraDevice">
+                      <option value="0">Câmera Padrão</option>
+                      <option value="1">Câmera Externa</option>
+                    </select>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label class="form-label" for="cameraResolution">Resolução</label>
+                    <select class="form-select" id="cameraResolution">
+                      <option value="640x480">640x480</option>
+                      <option value="1280x720">1280x720</option>
+                      <option value="1920x1080">1920x1080</option>
+                    </select>
+                  </div>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label class="form-label" for="cameraFps">FPS</label>
+                    <select class="form-select" id="cameraFps">
+                      <option value="15">15 FPS</option>
+                      <option value="30" selected>30 FPS</option>
+                      <option value="60">60 FPS</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="autoExposure" checked>
+                    <label class="form-check-label" for="autoExposure">
+                      Auto-exposição
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="mb-0">Configurações de Detecção</h5>
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <label class="form-label" for="minConfidence">Confiança Mínima</label>
+                    <input type="range" class="form-range" id="minConfidence" min="0" max="100" value="70" title="Confiança Mínima">
+                    <small class="text-muted">Valor: <span id="minConfidenceValue">70</span>%</small>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label class="form-label" for="sensitivity">Sensibilidade</label>
+                    <input type="range" class="form-range" id="sensitivity" min="1" max="10" value="5" title="Sensibilidade">
+                    <small class="text-muted">Valor: <span id="sensitivityValue">5</span></small>
+                  </div>
+                  
+                  <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="enableHandTracking" checked>
+                    <label class="form-check-label" for="enableHandTracking">
+                      Rastreamento de mãos
+                    </label>
+                  </div>
+                  
+                  <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="enableGestureRecognition" checked>
+                    <label class="form-check-label" for="enableGestureRecognition">
+                      Reconhecimento de gestos
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row mt-4">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="mb-0">Configurações do Mouse Virtual</h5>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label class="form-label" for="cursorSpeed">Velocidade do Cursor</label>
+                        <input type="range" class="form-range" id="cursorSpeed" min="1" max="10" value="5" title="Velocidade do Cursor">
+                        <small class="text-muted">Valor: <span id="cursorSpeedValue">5</span></small>
+                      </div>
+                      
+                      <div class="mb-3">
+                        <label class="form-label" for="deadband">Deadband</label>
+                        <input type="range" class="form-range" id="deadband" min="0" max="50" value="10" title="Deadband">
+                        <small class="text-muted">Valor: <span id="deadbandValue">10</span>px</small>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="enableMouse" checked>
+                        <label class="form-check-label" for="enableMouse">
+                          Habilitar mouse virtual
+                        </label>
+                      </div>
+                      
+                      <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="enableClick" checked>
+                        <label class="form-check-label" for="enableClick">
+                          Habilitar cliques
+                        </label>
+                      </div>
+                      
+                      <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="enableScroll" checked>
+                        <label class="form-check-label" for="enableScroll">
+                          Habilitar scroll
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row mt-4">
+            <div class="col-12 text-center">
+              <button class="btn btn-primary me-2" onclick="saveSettings()">
+                <i class="fas fa-save me-1"></i>Salvar Configurações
+              </button>
+              <button class="btn btn-secondary me-2" onclick="resetSettings()">
+                <i class="fas fa-undo me-1"></i>Restaurar Padrões
+              </button>
+              <button class="btn btn-info" onclick="exportSettings()">
+                <i class="fas fa-download me-1"></i>Exportar Configurações
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

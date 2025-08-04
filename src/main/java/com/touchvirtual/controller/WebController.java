@@ -124,6 +124,23 @@ public class WebController {
         return "layout";
     }
 
+    /**
+     * Página de teste (alias)
+     */
+    @GetMapping("/test")
+    public String test(Model model) {
+        return testPage(model);
+    }
+
+    @GetMapping("/status")
+    public String statusPage(Model model) {
+        model.addAttribute("title", "Status");
+        model.addAttribute("content", "status");
+        model.addAttribute("scripts", "status-scripts");
+
+        return "layout";
+    }
+
     @GetMapping("/api/status")
     @ResponseBody
     public Map<String, Object> getStatus() {

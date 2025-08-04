@@ -145,7 +145,7 @@
     <!-- Main Content -->
     <main class="container mt-4">
       <!-- Page Content -->
-      <div th:replace="~{::content}">
+      <div th:replace="~{${content} :: content}">
         <!-- Content will be inserted here -->
       </div>
     </main>
@@ -185,7 +185,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
     <!-- Custom Scripts -->
-    <div th:replace="~{::scripts}">
+    <div th:replace="~{${scripts} :: scripts}">
       <!-- Scripts will be inserted here -->
     </div>
   </body>

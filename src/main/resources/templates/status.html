@@ -1,0 +1,204 @@
+<!-- Página de Status -->
+<div th:fragment="content">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h4><i class="fas fa-info-circle me-2"></i>Status do Sistema</h4>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="mb-0">Status dos Componentes</h5>
+                </div>
+                <div class="card-body">
+                  <div class="list-group">
+                    <div
+                      class="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <div>
+                        <i class="fas fa-video text-primary me-2"></i>
+                        <strong>Câmera</strong>
+                      </div>
+                      <span
+                        class="badge bg-success rounded-pill"
+                        id="cameraStatus"
+                        >OK</span
+                      >
+                    </div>
+                    <div
+                      class="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <div>
+                        <i class="fas fa-hand-paper text-success me-2"></i>
+                        <strong>Detecção de Mãos</strong>
+                      </div>
+                      <span
+                        class="badge bg-success rounded-pill"
+                        id="handStatus"
+                        >OK</span
+                      >
+                    </div>
+                    <div
+                      class="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <div>
+                        <i class="fas fa-mouse-pointer text-warning me-2"></i>
+                        <strong>Mouse Virtual</strong>
+                      </div>
+                      <span
+                        class="badge bg-success rounded-pill"
+                        id="mouseStatus"
+                        >OK</span
+                      >
+                    </div>
+                    <div
+                      class="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <div>
+                        <i class="fas fa-crosshairs text-info me-2"></i>
+                        <strong>Calibração</strong>
+                      </div>
+                      <span
+                        class="badge bg-warning rounded-pill"
+                        id="calibrationStatus"
+                        >Pendente</span
+                      >
+                    </div>
+                    <div
+                      class="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <div>
+                        <i class="fas fa-cog text-secondary me-2"></i>
+                        <strong>OpenCV</strong>
+                      </div>
+                      <span
+                        class="badge bg-success rounded-pill"
+                        id="opencvStatus"
+                        >OK</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="mb-0">Informações do Sistema</h5>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-6">
+                      <p><strong>Versão:</strong> 1.0.0</p>
+                      <p><strong>Porta:</strong> 8081</p>
+                      <p>
+                        <strong>Status:</strong>
+                        <span class="badge bg-success">Online</span>
+                      </p>
+                      <p>
+                        <strong>Uptime:</strong> <span id="uptime">--</span>
+                      </p>
+                    </div>
+                    <div class="col-6">
+                      <p>
+                        <strong>OpenCV:</strong>
+                        <span class="badge bg-success">Carregado</span>
+                      </p>
+                      <p>
+                        <strong>WebSocket:</strong>
+                        <span class="badge bg-success">Ativo</span>
+                      </p>
+                      <p>
+                        <strong>JavaCV:</strong>
+                        <span class="badge bg-success">Disponível</span>
+                      </p>
+                      <p>
+                        <strong>Memória:</strong>
+                        <span id="memoryUsage">--</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card mt-3">
+                <div class="card-header">
+                  <h5 class="mb-0">Estatísticas em Tempo Real</h5>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-6">
+                      <p>
+                        <strong>FPS:</strong> <span id="fpsCounter">--</span>
+                      </p>
+                      <p>
+                        <strong>Latência:</strong>
+                        <span id="latencyCounter">--</span>ms
+                      </p>
+                      <p>
+                        <strong>Confiança:</strong>
+                        <span id="confidenceCounter">--</span>%
+                      </p>
+                    </div>
+                    <div class="col-6">
+                      <p>
+                        <strong>Gestos:</strong>
+                        <span id="gestureCounter">--</span>
+                      </p>
+                      <p>
+                        <strong>Landmarks:</strong>
+                        <span id="landmarkCounter">--</span>
+                      </p>
+                      <p>
+                        <strong>Último Gesto:</strong>
+                        <span id="lastGesture">--</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="mb-0">Log do Sistema</h5>
+                </div>
+                <div class="card-body">
+                  <div
+                    class="bg-dark text-light p-3 rounded"
+                    style="height: 200px; overflow-y: auto"
+                  >
+                    <div id="systemLog">
+                      <div class="text-success">
+                        ✅ Sistema iniciado com sucesso
+                      </div>
+                      <div class="text-info">
+                        ℹ️ OpenCV carregado - Versão 4.7.0
+                      </div>
+                      <div class="text-info">
+                        ℹ️ JavaCV carregado com sucesso
+                      </div>
+                      <div class="text-info">
+                        ℹ️ Serviço de detecção de mãos inicializado
+                      </div>
+                      <div class="text-warning">
+                        ⚠️ Ambiente headless detectado - Robot não disponível
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,192 @@
+<!-- Scripts da Página de Configurações -->
+<div th:fragment="scripts">
+  <script>
+    // Event listeners para controles
+    document
+      .getElementById("minConfidence")
+      .addEventListener("input", function () {
+        document.getElementById("minConfidenceValue").textContent = this.value;
+      });
+
+    document
+      .getElementById("sensitivity")
+      .addEventListener("input", function () {
+        document.getElementById("sensitivityValue").textContent = this.value;
+      });
+
+    document
+      .getElementById("cursorSpeed")
+      .addEventListener("input", function () {
+        document.getElementById("cursorSpeedValue").textContent = this.value;
+      });
+
+    document.getElementById("deadband").addEventListener("input", function () {
+      document.getElementById("deadbandValue").textContent = this.value;
+    });
+
+    function saveSettings() {
+      const settings = {
+        camera: {
+          device: document.getElementById("cameraDevice").value,
+          resolution: document.getElementById("cameraResolution").value,
+          fps: document.getElementById("cameraFps").value,
+          autoExposure: document.getElementById("autoExposure").checked,
+        },
+        detection: {
+          minConfidence: document.getElementById("minConfidence").value,
+          sensitivity: document.getElementById("sensitivity").value,
+          enableHandTracking:
+            document.getElementById("enableHandTracking").checked,
+          enableGestureRecognition: document.getElementById(
+            "enableGestureRecognition"
+          ).checked,
+        },
+        mouse: {
+          cursorSpeed: document.getElementById("cursorSpeed").value,
+          deadband: document.getElementById("deadband").value,
+          enableMouse: document.getElementById("enableMouse").checked,
+          enableClick: document.getElementById("enableClick").checked,
+          enableScroll: document.getElementById("enableScroll").checked,
+        },
+      };
+
+      // Salva no localStorage
+      localStorage.setItem("touchVirtualSettings", JSON.stringify(settings));
+
+      console.log("✅ Configurações salvas");
+      alert("Configurações salvas com sucesso!");
+    }
+
+    function resetSettings() {
+      if (
+        confirm("Tem certeza que deseja restaurar as configurações padrão?")
+      ) {
+        // Restaura valores padrão
+        document.getElementById("cameraDevice").value = "0";
+        document.getElementById("cameraResolution").value = "640x480";
+        document.getElementById("cameraFps").value = "30";
+        document.getElementById("autoExposure").checked = true;
+
+        document.getElementById("minConfidence").value = "70";
+        document.getElementById("minConfidenceValue").textContent = "70";
+        document.getElementById("sensitivity").value = "5";
+        document.getElementById("sensitivityValue").textContent = "5";
+        document.getElementById("enableHandTracking").checked = true;
+        document.getElementById("enableGestureRecognition").checked = true;
+
+        document.getElementById("cursorSpeed").value = "5";
+        document.getElementById("cursorSpeedValue").textContent = "5";
+        document.getElementById("deadband").value = "10";
+        document.getElementById("deadbandValue").textContent = "10";
+        document.getElementById("enableMouse").checked = true;
+        document.getElementById("enableClick").checked = true;
+        document.getElementById("enableScroll").checked = true;
+
+        console.log("🔄 Configurações restauradas");
+        alert("Configurações restauradas para os valores padrão!");
+      }
+    }
+
+    function exportSettings() {
+      const settings = {
+        camera: {
+          device: document.getElementById("cameraDevice").value,
+          resolution: document.getElementById("cameraResolution").value,
+          fps: document.getElementById("cameraFps").value,
+          autoExposure: document.getElementById("autoExposure").checked,
+        },
+        detection: {
+          minConfidence: document.getElementById("minConfidence").value,
+          sensitivity: document.getElementById("sensitivity").value,
+          enableHandTracking:
+            document.getElementById("enableHandTracking").checked,
+          enableGestureRecognition: document.getElementById(
+            "enableGestureRecognition"
+          ).checked,
+        },
+        mouse: {
+          cursorSpeed: document.getElementById("cursorSpeed").value,
+          deadband: document.getElementById("deadband").value,
+          enableMouse: document.getElementById("enableMouse").checked,
+          enableClick: document.getElementById("enableClick").checked,
+          enableScroll: document.getElementById("enableScroll").checked,
+        },
+      };
+
+      const dataStr = JSON.stringify(settings, null, 2);
+      const dataBlob = new Blob([dataStr], { type: "application/json" });
+
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(dataBlob);
+      link.download = "touchvirtual_settings.json";
+      link.click();
+
+      console.log("📤 Configurações exportadas");
+    }
+
+    function loadSettings() {
+      const savedSettings = localStorage.getItem("touchVirtualSettings");
+      if (savedSettings) {
+        try {
+          const settings = JSON.parse(savedSettings);
+
+          // Aplica configurações da câmera
+          if (settings.camera) {
+            document.getElementById("cameraDevice").value =
+              settings.camera.device || "0";
+            document.getElementById("cameraResolution").value =
+              settings.camera.resolution || "640x480";
+            document.getElementById("cameraFps").value =
+              settings.camera.fps || "30";
+            document.getElementById("autoExposure").checked =
+              settings.camera.autoExposure !== false;
+          }
+
+          // Aplica configurações de detecção
+          if (settings.detection) {
+            document.getElementById("minConfidence").value =
+              settings.detection.minConfidence || "70";
+            document.getElementById("minConfidenceValue").textContent =
+              settings.detection.minConfidence || "70";
+            document.getElementById("sensitivity").value =
+              settings.detection.sensitivity || "5";
+            document.getElementById("sensitivityValue").textContent =
+              settings.detection.sensitivity || "5";
+            document.getElementById("enableHandTracking").checked =
+              settings.detection.enableHandTracking !== false;
+            document.getElementById("enableGestureRecognition").checked =
+              settings.detection.enableGestureRecognition !== false;
+          }
+
+          // Aplica configurações do mouse
+          if (settings.mouse) {
+            document.getElementById("cursorSpeed").value =
+              settings.mouse.cursorSpeed || "5";
+            document.getElementById("cursorSpeedValue").textContent =
+              settings.mouse.cursorSpeed || "5";
+            document.getElementById("deadband").value =
+              settings.mouse.deadband || "10";
+            document.getElementById("deadbandValue").textContent =
+              settings.mouse.deadband || "10";
+            document.getElementById("enableMouse").checked =
+              settings.mouse.enableMouse !== false;
+            document.getElementById("enableClick").checked =
+              settings.mouse.enableClick !== false;
+            document.getElementById("enableScroll").checked =
+              settings.mouse.enableScroll !== false;
+          }
+
+          console.log("📥 Configurações carregadas");
+        } catch (error) {
+          console.error("❌ Erro ao carregar configurações:", error);
+        }
+      }
+    }
+
+    // Inicialização
+    document.addEventListener("DOMContentLoaded", function () {
+      console.log("⚙️ Página de configurações carregada");
+      loadSettings();
+    });
+  </script>
+</div>

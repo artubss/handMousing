@@ -1,0 +1,127 @@
+<!-- Scripts da Página da Câmera -->
+<div th:fragment="scripts">
+  <script>
+    let cameraActive = false;
+    let cameraStream = null;
+    let videoElement = null;
+
+    function startCamera() {
+      if (cameraActive) {
+        console.log("Câmera já está ativa");
+        return;
+      }
+
+      const constraints = {
+        video: {
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          frameRate: { ideal: 30 },
+        },
+      };
+
+      navigator.mediaDevices
+        .getUserMedia(constraints)
+        .then(function (stream) {
+          cameraStream = stream;
+          cameraActive = true;
+
+          // Cria elemento de vídeo
+          const cameraFeed = document.getElementById("cameraFeed");
+          cameraFeed.innerHTML =
+            '<video id="cameraVideo" autoplay muted style="max-width: 100%; height: auto;"></video>';
+
+          videoElement = document.getElementById("cameraVideo");
+          videoElement.srcObject = stream;
+
+          updateCameraStatus("Ativo");
+          updateCameraInfo();
+
+          console.log("✅ Câmera iniciada com sucesso");
+        })
+        .catch(function (error) {
+          console.error("❌ Erro ao iniciar câmera:", error);
+          updateCameraStatus("Erro: " + error.message);
+        });
+    }
+
+    function stopCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach((track) => track.stop());
+        cameraStream = null;
+        cameraActive = false;
+
+        const cameraFeed = document.getElementById("cameraFeed");
+        cameraFeed.innerHTML =
+          '<i class="fas fa-video fa-3x text-light"></i><p class="text-light mt-2">Feed da câmera será exibido aqui</p>';
+
+        updateCameraStatus("Parado");
+        console.log("🛑 Câmera parada");
+      }
+    }
+
+    function captureFrame() {
+      if (!cameraActive || !videoElement) {
+        alert("Câmera não está ativa");
+        return;
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = videoElement.videoWidth;
+      canvas.height = videoElement.videoHeight;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(videoElement, 0, 0);
+
+      // Cria link para download
+      const link = document.createElement("a");
+      link.download = "capture_" + new Date().getTime() + ".png";
+      link.href = canvas.toDataURL();
+      link.click();
+
+      console.log("📸 Frame capturado");
+    }
+
+    function updateCameraStatus(status) {
+      document.getElementById("cameraStatus").textContent = status;
+    }
+
+    function updateCameraInfo() {
+      if (videoElement) {
+        document.getElementById("currentResolution").textContent =
+          videoElement.videoWidth + "x" + videoElement.videoHeight;
+      }
+    }
+
+    // Event listeners para controles
+    document
+      .getElementById("resolutionSelect")
+      .addEventListener("change", function () {
+        if (cameraActive) {
+          stopCamera();
+          setTimeout(startCamera, 100);
+        }
+      });
+
+    document
+      .getElementById("fpsSelect")
+      .addEventListener("change", function () {
+        if (cameraActive) {
+          stopCamera();
+          setTimeout(startCamera, 100);
+        }
+      });
+
+    // Atualiza informações periodicamente
+    setInterval(function () {
+      if (cameraActive) {
+        updateCameraInfo();
+      }
+    }, 1000);
+
+    // Inicialização
+    document.addEventListener("DOMContentLoaded", function () {
+      console.log("📹 Página da câmera carregada");
+      updateCameraStatus("Desconectado");
+    });
+  </script>
+</div>

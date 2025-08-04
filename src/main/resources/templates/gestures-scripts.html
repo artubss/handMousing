@@ -1,0 +1,103 @@
+<!-- Scripts da Página de Gestos -->
+<div th:fragment="scripts">
+  <script>
+    let gestureHistory = [];
+    let currentGesture = null;
+
+    function updateGestureDisplay(gesture) {
+      const display = document.getElementById("gestureDisplay");
+      const lastGesture = document.getElementById("lastGesture");
+      const confidence = document.getElementById("gestureConfidence");
+
+      if (gesture) {
+        display.innerHTML = `
+          <i class="fas fa-hand-paper fa-4x text-success"></i>
+          <p class="mt-3 text-success">${
+            gesture.displayName || "Gesto detectado"
+          }</p>
+        `;
+        lastGesture.textContent = gesture.displayName || "Desconhecido";
+        confidence.textContent =
+          Math.round((gesture.confidence || 0) * 100) + "%";
+
+        // Adiciona ao histórico
+        gestureHistory.unshift({
+          gesture: gesture.displayName,
+          confidence: gesture.confidence,
+          timestamp: new Date(),
+        });
+
+        // Limita histórico a 10 itens
+        if (gestureHistory.length > 10) {
+          gestureHistory.pop();
+        }
+
+        currentGesture = gesture;
+      } else {
+        display.innerHTML = `
+          <i class="fas fa-hand-paper fa-4x text-muted"></i>
+          <p class="mt-3 text-muted">Aguardando gestos...</p>
+        `;
+      }
+    }
+
+    function updateGestureHistory() {
+      // Aqui você pode implementar a atualização do histórico
+      // Por enquanto, apenas mantemos os dados em memória
+    }
+
+    // Função para obter gestos do servidor
+    function fetchGestures() {
+      fetch("/api/status")
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.lastGesture) {
+            updateGestureDisplay(data.lastGesture);
+          }
+          if (data.gestureConfidence !== undefined) {
+            document.getElementById("gestureConfidence").textContent =
+              Math.round(data.gestureConfidence * 100) + "%";
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao obter gestos:", error);
+        });
+    }
+
+    // Event listeners para configurações
+    document
+      .getElementById("enableGestures")
+      .addEventListener("change", function () {
+        console.log(
+          "Reconhecimento de gestos:",
+          this.checked ? "habilitado" : "desabilitado"
+        );
+      });
+
+    document
+      .getElementById("showLandmarks")
+      .addEventListener("change", function () {
+        console.log("Landmarks:", this.checked ? "visíveis" : "ocultos");
+      });
+
+    document
+      .getElementById("enableSound")
+      .addEventListener("change", function () {
+        console.log(
+          "Som de feedback:",
+          this.checked ? "habilitado" : "desabilitado"
+        );
+      });
+
+    // Inicialização
+    document.addEventListener("DOMContentLoaded", function () {
+      console.log("🤚 Página de gestos carregada");
+
+      // Atualiza gestos a cada segundo
+      setInterval(fetchGestures, 1000);
+
+      // Atualização inicial
+      fetchGestures();
+    });
+  </script>
+</div>

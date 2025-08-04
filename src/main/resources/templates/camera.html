@@ -1,0 +1,126 @@
+<!-- Página da Câmera -->
+<div th:fragment="content">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h4><i class="fas fa-video me-2"></i>Visualização da Câmera</h4>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-8">
+              <div class="card">
+                <div class="card-body text-center">
+                  <div id="cameraFeed" class="bg-dark rounded p-3 mb-3">
+                    <i class="fas fa-video fa-3x text-light"></i>
+                    <p class="text-light mt-2">
+                      Feed da câmera será exibido aqui
+                    </p>
+                  </div>
+                  <div class="btn-group" role="group">
+                    <button class="btn btn-primary" onclick="startCamera()">
+                      <i class="fas fa-play me-1"></i>Iniciar
+                    </button>
+                    <button class="btn btn-secondary" onclick="stopCamera()">
+                      <i class="fas fa-stop me-1"></i>Parar
+                    </button>
+                    <button class="btn btn-info" onclick="captureFrame()">
+                      <i class="fas fa-camera me-1"></i>Capturar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="mb-0">Controles da Câmera</h5>
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <label class="form-label" for="resolutionSelect"
+                      >Resolução</label
+                    >
+                    <select class="form-select" id="resolutionSelect">
+                      <option value="640x480">640x480</option>
+                      <option value="1280x720">1280x720</option>
+                      <option value="1920x1080">1920x1080</option>
+                    </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label" for="fpsSelect">FPS</label>
+                    <select class="form-select" id="fpsSelect">
+                      <option value="15">15 FPS</option>
+                      <option value="30" selected>30 FPS</option>
+                      <option value="60">60 FPS</option>
+                    </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label" for="qualitySelect"
+                      >Qualidade</label
+                    >
+                    <select class="form-select" id="qualitySelect">
+                      <option value="low">Baixa</option>
+                      <option value="medium" selected>Média</option>
+                      <option value="high">Alta</option>
+                    </select>
+                  </div>
+
+                  <div class="form-check mb-3">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="autoExposure"
+                      checked
+                    />
+                    <label class="form-check-label" for="autoExposure">
+                      Auto-exposição
+                    </label>
+                  </div>
+
+                  <div class="form-check mb-3">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="showLandmarks"
+                      checked
+                    />
+                    <label class="form-check-label" for="showLandmarks">
+                      Mostrar landmarks
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card mt-3">
+                <div class="card-header">
+                  <h5 class="mb-0">Informações</h5>
+                </div>
+                <div class="card-body">
+                  <p>
+                    <strong>Status:</strong>
+                    <span id="cameraStatus">Desconectado</span>
+                  </p>
+                  <p>
+                    <strong>FPS Atual:</strong> <span id="currentFps">--</span>
+                  </p>
+                  <p>
+                    <strong>Resolução:</strong>
+                    <span id="currentResolution">--</span>
+                  </p>
+                  <p>
+                    <strong>Latência:</strong>
+                    <span id="currentLatency">--</span>ms
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

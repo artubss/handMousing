@@ -1,0 +1,127 @@
+<!-- Scripts da Página de Calibração -->
+<div th:fragment="scripts">
+  <script>
+    let calibrationActive = false;
+    let calibrationPoints = 0;
+
+    function startCalibration() {
+      const sessionId = "session_" + Date.now();
+
+      fetch("/api/calibration/start", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: "sessionId=" + sessionId,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            calibrationActive = true;
+            updateCalibrationStatus("Calibrando...");
+            console.log("✅ Calibração iniciada");
+          } else {
+            console.error("❌ Erro ao iniciar calibração:", data.message);
+          }
+        })
+        .catch((error) => {
+          console.error("❌ Erro ao iniciar calibração:", error);
+        });
+    }
+
+    function stopCalibration() {
+      fetch("/api/calibration/stop", {
+        method: "POST",
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            calibrationActive = false;
+            updateCalibrationStatus("Parado");
+            console.log("🛑 Calibração parada");
+          } else {
+            console.error("❌ Erro ao parar calibração:", data.message);
+          }
+        })
+        .catch((error) => {
+          console.error("❌ Erro ao parar calibração:", error);
+        });
+    }
+
+    function autoCalibrate() {
+      const sessionId = "session_" + Date.now();
+
+      fetch("/api/calibration/auto", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: "sessionId=" + sessionId,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            updateCalibrationStatus("Calibrado");
+            console.log("✅ Calibração automática realizada");
+          } else {
+            console.error("❌ Erro na calibração automática:", data.message);
+          }
+        })
+        .catch((error) => {
+          console.error("❌ Erro na calibração automática:", error);
+        });
+    }
+
+    function updateCalibrationStatus(status) {
+      document.getElementById("calibrationStatus").textContent = status;
+    }
+
+    function updateCalibrationPoints(points) {
+      document.getElementById("calibrationPoints").textContent = points + "/9";
+    }
+
+    // Event listeners para controles
+    document
+      .getElementById("sensitivity")
+      .addEventListener("input", function () {
+        document.getElementById("sensitivityValue").textContent = this.value;
+      });
+
+    document.getElementById("deadband").addEventListener("input", function () {
+      document.getElementById("deadbandValue").textContent = this.value;
+    });
+
+    // Função para obter status da calibração
+    function fetchCalibrationStatus() {
+      fetch("/api/calibration/current")
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.isCalibrating) {
+            updateCalibrationStatus("Calibrando...");
+          } else if (data.calibrated) {
+            updateCalibrationStatus("Calibrado");
+          } else {
+            updateCalibrationStatus("Não calibrado");
+          }
+
+          if (data.pointCount !== undefined) {
+            updateCalibrationPoints(data.pointCount);
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao obter status da calibração:", error);
+        });
+    }
+
+    // Inicialização
+    document.addEventListener("DOMContentLoaded", function () {
+      console.log("🎯 Página de calibração carregada");
+
+      // Atualiza status a cada 2 segundos
+      setInterval(fetchCalibrationStatus, 2000);
+
+      // Atualização inicial
+      fetchCalibrationStatus();
+    });
+  </script>
+</div>

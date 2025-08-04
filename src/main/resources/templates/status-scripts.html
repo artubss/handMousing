@@ -1,0 +1,136 @@
+<!-- Scripts da Página de Status -->
+<div th:fragment="scripts">
+  <script>
+    let startTime = Date.now();
+    let fpsCounter = 0;
+    let latencyCounter = 0;
+    let gestureCounter = 0;
+    let landmarkCounter = 0;
+    let lastUpdateTime = Date.now();
+
+    function updateStatus() {
+      fetch("/api/status")
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            updateComponentStatus("cameraStatus", data.cameraInitialized);
+            updateComponentStatus("handStatus", data.handDetected);
+            updateComponentStatus("mouseStatus", data.mouseEnabled);
+            updateComponentStatus("calibrationStatus", data.calibrated);
+            updateConfidence(data.confidence);
+            updateLastGesture(data.lastGesture);
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao obter status:", error);
+        });
+    }
+
+    function updateComponentStatus(elementId, status) {
+      const element = document.getElementById(elementId);
+      if (status) {
+        element.className = "badge bg-success rounded-pill";
+        element.textContent = "OK";
+      } else {
+        element.className = "badge bg-warning rounded-pill";
+        element.textContent = "Pendente";
+      }
+    }
+
+    function updateConfidence(confidence) {
+      const confidenceElement = document.getElementById("confidenceCounter");
+      const percentage = Math.round(confidence * 100);
+      confidenceElement.textContent = percentage + "%";
+    }
+
+    function updateLastGesture(gesture) {
+      const gestureElement = document.getElementById("lastGesture");
+      if (gesture && gesture.displayName) {
+        gestureElement.textContent = gesture.displayName;
+      } else {
+        gestureElement.textContent = "Nenhum";
+      }
+    }
+
+    function updateUptime() {
+      const uptimeElement = document.getElementById("uptime");
+      const currentTime = Date.now();
+      const uptime = currentTime - startTime;
+
+      const hours = Math.floor(uptime / (1000 * 60 * 60));
+      const minutes = Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((uptime % (1000 * 60)) / 1000);
+
+      uptimeElement.textContent = `${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    function updateMemoryUsage() {
+      const memoryElement = document.getElementById("memoryUsage");
+      if (performance.memory) {
+        const used = Math.round(
+          performance.memory.usedJSHeapSize / 1024 / 1024
+        );
+        const total = Math.round(
+          performance.memory.totalJSHeapSize / 1024 / 1024
+        );
+        memoryElement.textContent = `${used}MB / ${total}MB`;
+      } else {
+        memoryElement.textContent = "N/A";
+      }
+    }
+
+    function updateRealTimeStats() {
+      const currentTime = Date.now();
+      const timeDiff = currentTime - lastUpdateTime;
+
+      if (timeDiff > 0) {
+        const fps = Math.round(1000 / timeDiff);
+        document.getElementById("fpsCounter").textContent = fps;
+      }
+
+      lastUpdateTime = currentTime;
+    }
+
+    function addLogMessage(message, className = "text-info") {
+      const logDiv = document.getElementById("systemLog");
+      const timestamp = new Date().toLocaleTimeString();
+      const logEntry = document.createElement("div");
+      logEntry.className = className;
+      logEntry.textContent = `[${timestamp}] ${message}`;
+      logDiv.appendChild(logEntry);
+
+      // Limita o log a 50 entradas
+      while (logDiv.children.length > 50) {
+        logDiv.removeChild(logDiv.firstChild);
+      }
+
+      // Auto-scroll para o final
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    // Inicialização
+    document.addEventListener("DOMContentLoaded", function () {
+      console.log("📊 Página de status carregada");
+
+      // Atualiza status a cada 2 segundos
+      setInterval(updateStatus, 2000);
+
+      // Atualiza uptime a cada segundo
+      setInterval(updateUptime, 1000);
+
+      // Atualiza uso de memória a cada 5 segundos
+      setInterval(updateMemoryUsage, 5000);
+
+      // Atualiza estatísticas em tempo real
+      setInterval(updateRealTimeStats, 1000);
+
+      // Atualização inicial
+      updateStatus();
+      updateUptime();
+      updateMemoryUsage();
+
+      // Adiciona mensagem de log inicial
+      addLogMessage("Página de status carregada", "text-success");
+    });
+  </script>
+</div>
