@@ -19,7 +19,7 @@
                       <div
                         id="cameraFeed"
                         class="bg-dark rounded p-3 mb-3 text-center"
-                        style="min-height: 300px;"
+                        style="min-height: 300px"
                       >
                         <i class="fas fa-video fa-3x text-light"></i>
                         <p class="text-light mt-2">
@@ -131,13 +131,20 @@
                 <div class="card-body">
                   <div class="alert alert-info">
                     <i class="fas fa-mouse"></i>
-                    <strong>Controle do Mouse:</strong> Use suas mãos para controlar o cursor do mouse na tela.
+                    <strong>Controle do Mouse:</strong> Use suas mãos para
+                    controlar o cursor do mouse na tela.
                   </div>
                   <div class="btn-group w-100 mb-3" role="group">
-                    <button class="btn btn-primary" onclick="startMouseControl()">
+                    <button
+                      class="btn btn-primary"
+                      onclick="startMouseControl()"
+                    >
                       <i class="fas fa-mouse me-1"></i>Iniciar
                     </button>
-                    <button class="btn btn-warning" onclick="stopMouseControl()">
+                    <button
+                      class="btn btn-warning"
+                      onclick="stopMouseControl()"
+                    >
                       <i class="fas fa-stop me-1"></i>Parar
                     </button>
                   </div>
@@ -209,35 +216,47 @@
                       <i class="fas fa-mouse-pointer text-primary me-2"></i>
                       <strong>Click</strong>
                       <small class="text-muted d-block"
-                        >Dedo indicador estendido</small
-                      >
-                    </div>
-                    <div class="list-group-item">
-                      <i class="fas fa-mouse-pointer text-success me-2"></i>
-                      <strong>Right Click</strong>
-                      <small class="text-muted d-block"
-                        >Dois dedos estendidos</small
+                        >Aproximação da tela + apenas dedo indicador</small
                       >
                     </div>
                     <div class="list-group-item">
                       <i class="fas fa-mouse-pointer text-warning me-2"></i>
                       <strong>Double Click</strong>
                       <small class="text-muted d-block"
-                        >Quatro dedos estendidos</small
+                        >Aproximação da tela + indicador e médio</small
+                      >
+                    </div>
+                    <div class="list-group-item">
+                      <i class="fas fa-mouse-pointer text-success me-2"></i>
+                      <strong>Right Click</strong>
+                      <small class="text-muted d-block"
+                        >Aproximação da tela + indicador, médio e anelar</small
                       >
                     </div>
                     <div class="list-group-item">
                       <i class="fas fa-arrows-alt text-info me-2"></i>
                       <strong>Drag</strong>
-                      <small class="text-muted d-block">Mão fechada</small>
+                      <small class="text-muted d-block"
+                        >Mão fechada (punho)</small
+                      >
                     </div>
                     <div class="list-group-item">
                       <i class="fas fa-scroll text-secondary me-2"></i>
                       <strong>Scroll</strong>
                       <small class="text-muted d-block"
-                        >Três dedos estendidos</small
+                        >4 dedos (indicador, médio, anelar, mínimo) - deslize
+                        vertical</small
                       >
                     </div>
+                  </div>
+
+                  <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Dica:</strong> Para clicar, aproxime a mão da tela e
+                    estenda apenas o dedo indicador. Para duplo clique, use
+                    indicador + médio. Para clique direito, use indicador +
+                    médio + anelar. Para scroll, estenda 4 dedos e mova
+                    verticalmente como em tablet.
                   </div>
                 </div>
               </div>
@@ -270,6 +289,10 @@
                   <p>
                     <strong>Posição do Mouse:</strong>
                     <span id="mousePosition">--</span>
+                  </p>
+                  <p>
+                    <strong>Profundidade:</strong>
+                    <span id="depthInfo">--</span>
                   </p>
                 </div>
               </div>

@@ -524,6 +524,14 @@
             }
           }
 
+          // Atualiza informações de profundidade
+          if (data.depth !== undefined) {
+            const depthElement = document.getElementById("depthInfo");
+            if (depthElement) {
+              depthElement.textContent = (data.depth * 100).toFixed(1) + "%";
+            }
+          }
+
           // Processa gesto do mouse control se disponível
           if (data.last_gesture && data.last_gesture !== "NONE") {
             processGesture(data.last_gesture, 0.8); // Confiança alta para gestos do mouse
